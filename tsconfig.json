@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    },
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "outDir": "./build",
+    "target": "es2020",
+    "rootDir": "./src",
+    "noImplicitAny": false,
+    "removeComments": true,
+  },
+  "include": [
+    "src/**/*",
+    "commands/Scaffolder.js",
+    "commands/SeedScaffolder.js",
+    "commands/Migrate.js",
+    "commands/Rollback.js",
+  ]
+}
