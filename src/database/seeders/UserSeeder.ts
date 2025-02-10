@@ -1,13 +1,16 @@
+import 'module-alias/register';
 import { User } from "@/app/models/User";
-
 
 export class UserSeeder {
     static async run() {
-        // masukkan logika seeding di sini
-        await User.create({
-            email: 'admin@example.com',
-            password: '$2b$12$yC6c8tCFuR1pUlnrpSSCK.Kqx66Rt4rWRqxiCq6ZZgu5sMsDRopoW',
-        });
-
+        await User.insert([
+    {
+        "id": 1,
+        "email": "admin@example.com",
+        "password": "$2b$12$yC6c8tCFuR1pUlnrpSSCK.Kqx66Rt4rWRqxiCq6ZZgu5sMsDRopoW",
+        "created_at": "2025-02-07T23:53:50.000Z",
+        "updated_at": "2025-02-07T23:53:50.000Z"
+    }
+]);
     }
 }

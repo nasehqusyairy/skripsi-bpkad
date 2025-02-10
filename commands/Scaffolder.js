@@ -72,16 +72,22 @@ async function generateMigration(tableName, columns) {
             if (isNullable) columnsDefinition += `.nullable()`;
             columnsDefinition += `;\n`;
             continue;
-        } else if (isPrimaryKey) {
-            columnsDefinition += `            table.primary('${columnName}')`;
-            if (isAutoIncrement) columnsDefinition += `.autoIncrement()`;
-            columnsDefinition += `;\n`;
-            continue;
         }
 
         // Tambahkan kolom ke migrasi
         const chain = `            table.${mapColumnType(columnType)}('${columnName}')`;
         columnsDefinition += chain;
+
+        if (isAutoIncrement) {
+            columnsDefinition += `.autoIncrement()`;
+        }
+
+        if (isPrimaryKey) {
+            columnsDefinition += `.primary()`;
+            columnsDefinition += `;\n`;
+            continue;
+        }
+
         if (isNullable) columnsDefinition += `.nullable()`;
         if (defaultValue) {
             let isRaw = false;

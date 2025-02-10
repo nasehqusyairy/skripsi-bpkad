@@ -1,0 +1,15 @@
+import 'module-alias/register';
+import { MYSQL as DB } from "@/utils/database/DB";
+
+export class {{className}} {
+    static async run() {
+        const records = {{records}};
+        let keys = Object.keys(records[0]);
+        let values = records
+            .map(row => `(${keys.map(key => JSON.stringify(row[key])).join(", ")})`)
+            .join(",\n        ");
+
+        await DB.execute(`INSERT INTO {{tableName}} (${keys.join(", ")}) VALUES
+        ${values};`);
+    }
+}

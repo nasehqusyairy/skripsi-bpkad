@@ -2,12 +2,12 @@ import { DB } from "@/utils/database/DB";
 import { Model } from "../Model";
 
 
-export class HasMany<I> {
+export class HasMany<I, R> {
 
-    model: typeof Model;
+    model: typeof Model<R>;
     foreignKey: string;
 
-    constructor(model: typeof Model, foreignKey: string) {
+    constructor(model: typeof Model<R>, foreignKey: string) {
         this.model = model;
         this.foreignKey = foreignKey;
     }

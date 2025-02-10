@@ -2,7 +2,7 @@ const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-console.time('done');
+console.time('Done');
 console.log('Starting build process...');
 console.log('Running TypeScript compilation...');
 console.log('');
@@ -45,8 +45,9 @@ exec('tsc', (error, stdout, stderr) => {
 
         // Mengubah warna teks menjadi kuning dan menampilkan ukuran file dengan path relatif
         const relativePath = path.relative(__dirname, filePath);
-        console.log('\x1b[33m%s\x1b[0m', `${relativePath} \t ${fileSizeInKB.toFixed(2)} KB`);
+        // console.log('\x1b[33m%s\x1b[0m', `${relativePath} \t ${fileSizeInKB.toFixed(2)} KB`);
     }
+
 
     // Fungsi untuk mengunjungi setiap file di folder dist secara rekursif
     function minifyDirectory(directoryPath) {
@@ -70,18 +71,51 @@ exec('tsc', (error, stdout, stderr) => {
     // Menentukan folder dist
     const distFolder = path.join(__dirname, '../build');
 
+    // fungsi untuk mengumpulkan nama dan ukuran file dalam folder dist secara rekursif
+    // fungsi ini mengembalikan array yang berisi objek dengan properti nama dan ukuran
+    function getFilesInfo(directoryPath) {
+        const items = fs.readdirSync(directoryPath);
+        const filesInfo = [];
+
+        items.forEach((item) => {
+            const itemPath = path.join(directoryPath, item);
+            const stats = fs.statSync(itemPath);
+
+            // Jika item adalah folder dan bukan folder types, lakukan rekursi
+            if (stats.isDirectory() && item !== 'types') {
+                const subFilesInfo = getFilesInfo(itemPath);
+                filesInfo.push(...subFilesInfo);
+            }
+            // Jika item adalah file .js, tambahkan nama dan ukuran file ke array
+            else if (stats.isFile() && item.endsWith('.js')) {
+                const fileSizeInBytes = stats.size;
+                const fileSizeInKB = fileSizeInBytes / 1024;
+
+                filesInfo.push({
+                    Name: itemPath.replace(distFolder, '\\build'),
+                    'Size (KB)': fileSizeInKB,
+                });
+            }
+        });
+
+        return filesInfo;
+    }
+
+
     // Mulai proses minifikasi pada folder dist
     console.log('File minified: ');
     minifyDirectory(distFolder);
+
+    console.table(getFilesInfo(distFolder));
 
     // Empty line before the completion message
     console.log('');
 
     // Menampilkan waktu yang dihabiskan
-    console.timeEnd('done');
+    console.timeEnd('Done');
 
     // Menampilkan total ukuran file
-    console.log(`size: ${totalSize.toFixed(2)} KB`)
+    console.log(`Total size: ${totalSize.toFixed(2)} KB`)
     console.log('');
 
     console.log('\x1b[34m%s\x1b[0m', '✔ Build selesai!');

@@ -9,7 +9,7 @@ async function rollbackMigrations() {
         // Baca semua file dalam folder migrations
         const files = fs.readdirSync(migrationsDir)
 
-        console.log('Menjalankan rollback:', files);
+        console.log('File terdeteksi: ', files);
         console.log('');
 
 

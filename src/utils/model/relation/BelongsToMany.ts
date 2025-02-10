@@ -62,7 +62,7 @@ export class BelongsToMany<I, R> {
     }
 
 
-    async fetch(ids: any[]): Promise<object> {
+    async fetch(ids: any[]): Promise<GroupedData> {
         // Ambil data dari tabel pivot hanya sekali
         const pivotQuery = `
         SELECT * FROM ${this.pivotTable}
@@ -85,7 +85,7 @@ export class BelongsToMany<I, R> {
         }
 
         // Kelompokkan hasil berdasarkan foreignKey
-        const groupedData = {};
+        const groupedData: GroupedData = {};
         ids.forEach(id => groupedData[id] = { relatedData: [], pivotData: [] });
 
         pivotResults.forEach(pivotRow => {
@@ -103,12 +103,12 @@ export class BelongsToMany<I, R> {
         return groupedData;
     }
 
-    attachResults(results: Model<I>[], groupedData: object, relationName: string) {
+    attachResults(results: Model<I>[], groupedData: GroupedData, relationName: string) {
         results.forEach(result => {
             const data = groupedData[result[result.getPrimaryKey()]];
             if (data) {
-                result[relationName] = data.relatedData.map(item => {
-                    const pivot = data.pivotData.find(pivotItem => pivotItem[this.relatedKey] === item[this.model.getPrimaryKey()]);
+                result[relationName] = data.relatedData.map((item) => {
+                    const pivot = data.pivotData.find((pivotItem) => pivotItem[this.relatedKey] === item[this.model.getPrimaryKey()]);
                     return { ...item, pivot };
                 });
             } else {
@@ -116,5 +116,16 @@ export class BelongsToMany<I, R> {
             }
             result.attributes[relationName] = result[relationName];
         });
+    }
+}
+
+type PivotRecord = {
+    [key: string]: any
+}
+
+type GroupedData = {
+    [key: string]: {
+        relatedData: any[],
+        pivotData: PivotRecord[]
     }
 }

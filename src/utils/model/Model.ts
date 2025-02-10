@@ -254,9 +254,9 @@ export class Model<I> {
         return model
     }
 
-    static orWhere<T extends Model<object>>(...args: [string, string, any]): T
-    static orWhere<T extends Model<object>>(...args: [string, any]): T
-    static orWhere<T extends Model<object>>(args: object): T
+    static orWhere(column: string, operator: QueryOperator, value: any): Model<any>
+    static orWhere(column: string, value: any): Model<any>
+    static orWhere(args: object): Model<any>
 
     static orWhere(...args: [string, string, any] | [string, any] | [object]) {
         const model = new this()
@@ -280,10 +280,9 @@ export class Model<I> {
         return model
     }
 
-
-    static orWhereNot<T extends Model<object>>(...args: [string, string, any]): T
-    static orWhereNot<T extends Model<object>>(...args: [string, any]): T
-    static orWhereNot<T extends Model<object>>(args: object): T
+    static orWhereNot(column: string, operator: QueryOperator, value: any): Model<any>
+    static orWhereNot(column: string, value: any): Model<any>
+    static orWhereNot(args: object): Model<any>
 
     static orWhereNot(...args: [string, string, any] | [string, any] | [object]) {
         const model = new this();
@@ -319,9 +318,9 @@ export class Model<I> {
         return model
     }
 
-    static whereNot<T extends Model<object>>(...args: [string, string, any]): T
-    static whereNot<T extends Model<object>>(...args: [string, any]): T
-    static whereNot<T extends Model<object>>(args: object): T
+    static whereNot(column: string, operator: QueryOperator, value: any): Model<any>
+    static whereNot(column: string, value: any): Model<any>
+    static whereNot(args: object): Model<any>
 
     static whereNot(...args: [string, string, any] | [string, any] | [object]) {
         const model = new this();
@@ -439,8 +438,8 @@ export class Model<I> {
 
     // #region Where Instance
 
-    where<T extends Model<I>>(...args: [string, string, any]): T
-    where<T extends Model<I>>(...args: [string, any]): T
+    where<T extends Model<I>>(column: string, operator: QueryOperator, value: any): T
+    where<T extends Model<I>>(column: string, value: any): T
     where<T extends Model<I>>(args: Partial<I>): T
 
     where(...args: [string, string, any] | [string, any] | [Partial<I>]) {
@@ -465,9 +464,10 @@ export class Model<I> {
         return this;
     }
 
-    orWhere<T extends Model<I>>(...args: [string, string, any]): T
-    orWhere<T extends Model<I>>(...args: [string, any]): T
+    orWhere<T extends Model<I>>(column: string, operator: QueryOperator, value: any): T
+    orWhere<T extends Model<I>>(column: string, value: any): T
     orWhere<T extends Model<I>>(args: Partial<I>): T
+
     orWhere(...args: [string, string, any] | [string, any] | [Partial<I>]) {
 
         if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
@@ -490,9 +490,10 @@ export class Model<I> {
         return this;
     }
 
-    orWhereNot<T extends Model<I>>(...args: [string, string, any]): T
-    orWhereNot<T extends Model<I>>(...args: [string, any]): T
+    orWhereNot<T extends Model<I>>(column: string, operator: QueryOperator, value: any): T
+    orWhereNot<T extends Model<I>>(column: string, value: any): T
     orWhereNot<T extends Model<I>>(args: Partial<I>): T
+
     orWhereNot(...args: [string, string, any] | [string, any] | [Partial<I>]) {
 
         if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
@@ -525,9 +526,10 @@ export class Model<I> {
         return this;
     }
 
-    whereNot<T extends Model<I>>(...args: [string, string, any]): T
-    whereNot<T extends Model<I>>(...args: [string, any]): T
+    whereNot<T extends Model<I>>(column: string, operator: QueryOperator, value: any): T
+    whereNot<T extends Model<I>>(column: string, value: any): T
     whereNot<T extends Model<I>>(args: Partial<I>): T
+
     whereNot(...args: [string, string, any] | [string, any] | [Partial<I>]) {
 
         if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
@@ -737,7 +739,7 @@ export class Model<I> {
 
     // #region Relationship
     // Fungsi untuk mendefinisikan relasi hasOne
-    hasOne(model: typeof Model, foreignKey?: string): HasOne<I> {
+    hasOne<R>(model: typeof Model<R>, foreignKey?: string): HasOne<I, R> {
         if (!foreignKey) {
             foreignKey = `${this.constructor.name.toLowerCase()}_${this.primaryKey}`;
         }
@@ -747,7 +749,7 @@ export class Model<I> {
 
 
     // Fungsi untuk mendefinisikan relasi hasMany
-    hasMany(model: typeof Model, foreignKey?: string): HasMany<I> {
+    hasMany<R>(model: typeof Model<R>, foreignKey?: string): HasMany<I, R> {
 
         if (!foreignKey) {
             foreignKey = `${this.constructor.name.toLocaleLowerCase()}_${this.primaryKey}`;
@@ -757,7 +759,7 @@ export class Model<I> {
     }
 
     // Fungsi untuk mendefinisikan relasi belongsTo
-    belongsTo(model: typeof Model, foreignKey?: string, primaryKey?: string): BelongsTo<I> {
+    belongsTo<R>(model: typeof Model<R>, foreignKey?: string, primaryKey?: string): BelongsTo<I, R> {
         if (!foreignKey) {
             foreignKey = `${model.name.toLowerCase()}_${model.getPrimaryKey()}`;
         }
@@ -820,7 +822,7 @@ export class Model<I> {
     // #endregion
 
     // #region Get
-    async get() {
+    async get(): Promise<this[]> {
         // Ambil data utama
         let results = await this.DB.table(this.getTableName()).get();
 

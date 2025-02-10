@@ -1,0 +1,8 @@
+import 'module-alias/register';
+import { {{modelName}} } from "@/app/models/{{modelName}}";
+
+export class {{className}} {
+    static async run() {
+        await {{modelName}}.insert({{records}});
+    }
+}

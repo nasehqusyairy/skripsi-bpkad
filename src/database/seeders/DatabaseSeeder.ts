@@ -1,17 +1,15 @@
 import "module-alias/register";
 import { MYSQL as DB } from "@/utils/database/DB";
 import { UserSeeder } from "./UserSeeder";
-import { UsersSeeder } from "./UsersSeeder";
-import { RolesSeeder } from "./RolesSeeder";
+import { RoleSeeder } from "./RoleSeeder";
 import { RoleUserSeeder } from "./RoleUserSeeder";
 
 
 (async () => {
 
     const seeders = [
-        // UserSeeder
-        UsersSeeder,
-        RolesSeeder,
+        UserSeeder,
+        RoleSeeder,
         RoleUserSeeder
     ]
 

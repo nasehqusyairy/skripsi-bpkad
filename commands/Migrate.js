@@ -9,7 +9,7 @@ async function runMigrations() {
         // Baca semua file dalam folder migrations
         const files = fs.readdirSync(migrationsDir)
 
-        console.log('Menjalankan migrasi', files);
+        console.log('File terdeteksi: ', files);
         console.log('');
 
         for (const file of files) {

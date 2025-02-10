@@ -2,13 +2,13 @@ import { DB } from "@/utils/database/DB";
 import { Model } from "../Model";
 
 
-export class BelongsTo<I> {
+export class BelongsTo<I, R> {
 
-    model: typeof Model;
+    model: typeof Model<R>;
     foreignKey: string;
     primaryKey: string;
 
-    constructor(model: typeof Model, foreignKey: string, primaryKey: string) {
+    constructor(model: typeof Model<R>, foreignKey: string, primaryKey: string) {
         this.model = model;
         this.foreignKey = foreignKey;
         this.primaryKey = primaryKey;

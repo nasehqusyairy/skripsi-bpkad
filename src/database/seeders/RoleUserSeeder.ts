@@ -3,22 +3,22 @@ import { MYSQL as DB } from "@/utils/database/DB";
 
 export class RoleUserSeeder {
     static async run() {
-        const data = [
+        const records = [
     {
         "id": 1,
         "nama_relasi": "relasi1",
         "user_id": 1,
         "role_id": 1,
-        "created_at": "2025-02-08T21:08:55.000Z",
-        "updated_at": "2025-02-09T04:45:38.000Z"
+        "created_at": "2025-02-08T07:08:55.000Z",
+        "updated_at": "2025-02-08T14:45:38.000Z"
     }
 ];
+        let keys = Object.keys(records[0]);
+        let values = records
+            .map(row => `(${keys.map(key => JSON.stringify(row[key])).join(", ")})`)
+            .join(",\n        ");
 
-        for (const record of data) {
-            await DB.query(
-                `INSERT INTO role_user (${Object.keys(record).join(', ')}) VALUES (${Object.values(record).map(v => '?').join(', ')})`,
-                Object.values(record)
-            );
-        }
+        await DB.execute(`INSERT INTO role_user (${keys.join(", ")}) VALUES
+        ${values};`);
     }
 }
