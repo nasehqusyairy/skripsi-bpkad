@@ -18,6 +18,6 @@ export class User extends Model<IUser> {
 
     // Tambahkan relasi manual di sini jika diperlukan
     public roles() {
-        return this.belongsToMany(Role, 'role_user', 'user_id', 'role_id');
+        return this.belongsToMany(Role, 'role_user');
     }
 }
