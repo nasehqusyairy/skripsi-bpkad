@@ -14,6 +14,8 @@ export class User extends Model<IUser> {
         super(attributes);
     }
 
+    protected hidden: string[] = ['password'];
+
     // Tambahkan relasi manual di sini jika diperlukan
     public posts() {
         return this.hasMany(Post, 'user_id');
