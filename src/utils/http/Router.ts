@@ -29,23 +29,41 @@ export class Router {
     }
 
     resource(prefix: string, controller: any, middlewares: Middleware[] = []) {
+        const routes = [
+            { method: "get", path: `/${prefix}`, action: "index" },
+            { method: "get", path: `/${prefix}/show/:id`, action: "show" },
+            { method: "get", path: `/${prefix}/create`, action: "create" },
+            { method: "post", path: `/${prefix}/store`, action: "store" },
+            { method: "get", path: `/${prefix}/edit/:id`, action: "edit" },
+            { method: "post", path: `/${prefix}/update/:id`, action: "update" },
+            { method: "get", path: `/${prefix}/delete/:id`, action: "delete" },
+        ];
 
-        this.router.get(`/${prefix}`, ...middlewares, controller.index);
-        this.router.get(`/${prefix}/create`, ...middlewares, controller.create);
-        this.router.post(`/${prefix}/store`, ...middlewares, controller.store);
-        this.router.get(`/${prefix}/edit/:id`, ...middlewares, controller.edit);
-        this.router.post(`/${prefix}/update/:id`, ...middlewares, controller.update);
-        this.router.get(`/${prefix}/delete/:id`, ...middlewares, controller.delete);
+        for (const route of routes) {
+            if (typeof controller[route.action] === "function") {
+                this.router[route.method](route.path, ...middlewares, controller[route.action]);
+            }
+        }
+
         return this;
     }
 
     apiResource(prefix: string, controller: any, middlewares: Middleware[] = []) {
+        const routes = [
+            { method: "get", path: `/${prefix}`, action: "index" },
+            { method: "post", path: `/${prefix}`, action: "store" },
+            { method: "get", path: `/${prefix}/:id`, action: "show" },
+            { method: "put", path: `/${prefix}/:id`, action: "update" },
+            { method: "delete", path: `/${prefix}/:id`, action: "delete" },
+        ];
 
-        this.router.get(`/${prefix}`, ...middlewares, controller.index);
-        this.router.post(`/${prefix}`, ...middlewares, controller.store);
-        this.router.get(`/${prefix}/:id`, ...middlewares, controller.show);
-        this.router.put(`/${prefix}/:id`, ...middlewares, controller.update);
-        this.router.delete(`/${prefix}/:id`, ...middlewares, controller.delete);
+        for (const route of routes) {
+            if (typeof controller[route.action] === "function") {
+                this.router[route.method](route.path, ...middlewares, controller[route.action]);
+            }
+        }
+
         return this;
     }
+
 }

@@ -1,14 +1,18 @@
 import { Post } from "@/app/models/Post";
+import { Response } from "@/utils/http/Response";
 import { ControllerAction } from "@/utils/References";
 
 export class PostController {
     static index: ControllerAction = async (req, res) => {
-
         const page = req.query.page ? parseInt(req.query.page as string) : 1;
         const perPage = 5;
 
-        const pagination = await Post.with("user").where({ user_id: req.session.userId }).paginate(page, perPage);
-        res.render("posts/index", { pagination });
+        const pagination = await Post.with("user").where({ user_id: req.userId }).paginate(page, perPage);
+        const data = [...pagination.results]
+
+        delete pagination.results;
+
+        res.json(Response.success('Data post berhasil diambil! Berikut adalah daftar postingan yang anda buat.', data, pagination));
     }
 
     static show: ControllerAction = (req, res) => {
@@ -16,37 +20,22 @@ export class PostController {
     }
 
     static create: ControllerAction = (req, res) => {
-        res.render("posts/create");
+        // TODO: Implement create logic
     }
 
     static store: ControllerAction = async (req, res) => {
-
-        Post.create({
-            ...req.body,
-            user_id: req.session.userId
-        });
-
-        res.redirect("/posts");
+        // TODO: Implement store logic
     }
 
     static edit: ControllerAction = async (req, res) => {
-        const post = await Post.find(req.params.id);
-        res.render("posts/edit", { post });
+        // TODO: Implement edit logic
     }
 
     static update: ControllerAction = async (req, res) => {
-        const post = new Post({
-            ...req.body,
-            id: req.params.id
-        });
-
-        await post.save();
-
-        res.redirect("/posts");
+        // TODO: Implement update logic
     }
 
     static delete: ControllerAction = async (req, res) => {
-        await Post.delete(req.params.id);
-        res.redirect("/posts");
+        // TODO: Implement delete logic
     }
 }

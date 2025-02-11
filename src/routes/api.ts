@@ -4,6 +4,7 @@ import { apiAuth } from "@/app/middlewares/auth";
 import { Router } from "@/utils/http/Router";
 import { Response } from "@/utils/http/Response";
 import express, { Response as ExpressResponse, Request as ExpressRequest } from 'express';
+import { PostController } from "@/app/controllers/api/PostController";
 
 
 const router = new Router() as Router & express.Router;
@@ -21,5 +22,7 @@ router.group('/auth', (authRouter: Router & express.Router) => {
     authRouter.post('/', AuthController.login);
     authRouter.get('/logout', apiAuth, AuthController.logout);
 });
+
+router.apiResource('posts', PostController, [apiAuth])
 
 export const apiRoutes = router.router;
