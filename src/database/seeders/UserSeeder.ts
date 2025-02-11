@@ -8,8 +8,8 @@ export class UserSeeder {
         "id": 1,
         "email": "admin@example.com",
         "password": "$2b$12$yC6c8tCFuR1pUlnrpSSCK.Kqx66Rt4rWRqxiCq6ZZgu5sMsDRopoW",
-        "created_at": "2025-02-07T23:53:50.000Z",
-        "updated_at": "2025-02-07T23:53:50.000Z"
+        "created_at": "2025-02-07T16:53:50.000Z",
+        "updated_at": "2025-02-07T16:53:50.000Z"
     }
 ]);
     }

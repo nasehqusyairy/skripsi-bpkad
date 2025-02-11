@@ -10,9 +10,9 @@
     "scaffold:seeder": "node --env-file=.env ./commands/SeedScaffolder.js",
     "migrate": "node --env-file=.env ./commands/Migrate.js",
     "migrate:rollback": "node --env-file=.env ./commands/Rollback.js",
-    "migrate:fresh": "npm run migrate:rollback && npm run migrate",
+    "migrate:fresh": "npm run build && npm run migrate:rollback && npm run migrate",
     "seed": "node --env-file=.env ./build/database/seeders/DatabaseSeeder.js",
-    "migrate:fresh-seed": "npm run build && npm run migrate:fresh && npm run seed"
+    "migrate:fresh-seed": "npm run migrate:fresh && npm run seed"
   },
   "keywords": [],
   "author": "Mohammad Nasyikh Al-Qusyairy",

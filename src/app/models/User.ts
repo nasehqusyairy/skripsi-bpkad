@@ -1,5 +1,5 @@
 import { Model } from "@/utils/model/Model";
-import { Role } from "./Role";
+import { Post } from "./Post";
 
 export interface IUser {
     id: number;
@@ -14,10 +14,8 @@ export class User extends Model<IUser> {
         super(attributes);
     }
 
-    protected hidden: string[] = ['password'];
-
     // Tambahkan relasi manual di sini jika diperlukan
-    public roles() {
-        return this.belongsToMany(Role, 'role_user');
+    public posts() {
+        return this.hasMany(Post, 'user_id');
     }
 }

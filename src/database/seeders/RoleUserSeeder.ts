@@ -9,8 +9,8 @@ export class RoleUserSeeder {
         "nama_relasi": "relasi1",
         "user_id": 1,
         "role_id": 1,
-        "created_at": "2025-02-08T07:08:55.000Z",
-        "updated_at": "2025-02-08T14:45:38.000Z"
+        "created_at": "2025-02-08T00:08:55.000Z",
+        "updated_at": "2025-02-08T07:45:38.000Z"
     }
 ];
         let keys = Object.keys(records[0]);

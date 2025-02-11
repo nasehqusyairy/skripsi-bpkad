@@ -1,51 +1,64 @@
 const fs = require("fs");
 const path = require("path");
 const { DB } = require("./DB");
+const { singularize, pluralize } = require("sequelize/lib/utils");
 
-
+//#region Generate
 async function generate() {
     console.log('\x1b[34m%s\x1b[0m', 'Memulai proses scaffolding...');
-    console.time('done');
+    console.time('Done');
 
     // Ambil daftar tabel dari database
     const [tables] = await DB.execute("SHOW TABLES");
+    const databaseName = DB.pool.config.connectionConfig.database;
 
+    let allTables = [];
 
     for (const table of tables) {
-        const tableName = table[`Tables_in_${DB.pool.config.connectionConfig.database}`];
+        const tableName = table[`Tables_in_${databaseName}`];
+
         // Ambil informasi kolom
         const [columns] = await DB.execute(`DESCRIBE ${tableName}`);
+
+        // Simpan tabel dan kolom ke allTables
+        allTables.push({ name: tableName, columns });
 
         // Buat file migrasi
         await generateMigration(tableName, columns);
 
         // Buat file model (hanya untuk tabel yang bukan pivot)
         if (!tableName.includes("_")) {
-            await generateModel(tableName, columns);
+            await generateModel(tableName, columns, allTables); // Kirim allTables dengan struktur yang benar
         }
     }
 
-    const createdMigrations = fs.readdirSync("src/database/migrations");
-    const createdModels = fs.readdirSync("src/app/models");
+    const migrationPath = path.join("src", "database", "migrations");
+    const modelPath = path.join("src", "app", "models");
+
+    const createdMigrations = fs.readdirSync(migrationPath);
+    const createdModels = fs.readdirSync(modelPath);
 
     console.log('');
     console.log("Migrasi dibuat:");
     for (const migration of createdMigrations) {
-        console.log('\x1b[33m%s\x1b[0m', migration);
+        console.log('\x1b[33m%s\x1b[0m', migrationPath + migration);
     }
 
     console.log('');
     console.log("Model dibuat:");
     for (const model of createdModels) {
-        console.log('\x1b[33m%s\x1b[0m', model);
+        console.log('\x1b[33m%s\x1b[0m', modelPath + model);
     }
 
     DB.end();
     console.log('');
-    console.timeEnd('done');
+    console.timeEnd('Done');
     console.log('\x1b[32m%s\x1b[0m', '✔ Scaffolding selesai!');
 }
+//#endregion
 
+
+//#region Migration
 async function generateMigration(tableName, columns) {
     // Baca template migrasi
     const templatePath = path.join("commands", "templates", "migration.txt");
@@ -114,30 +127,82 @@ async function generateMigration(tableName, columns) {
     const migrationPath = path.join("src", "database", "migrations", fileName);
     fs.writeFileSync(migrationPath, template);
 }
+//#endregion
 
-async function generateModel(tableName, columns) {
-    // Baca template model
+//#region Model
+async function generateModel(tableName, columns, allTables) {
     const templatePath = path.join("commands", "templates", "model.txt");
     let template = fs.readFileSync(templatePath, "utf-8");
 
-    // Generate nama class
     const className = toPascalCase(toSingular(tableName));
+
+    // Mendeteksi foreign key berdasarkan pola penamaan & mendapatkan daftar import
+    const { relations, relationImports } = detectRelations(tableName, columns, allTables);
 
     // Generate daftar field untuk interface
     let fieldsDefinition = columns
         .map(col => `    ${col.Field}${col.Null === "YES" ? "?" : ""}: ${mapTsType(col.Type)};`)
         .join("\n");
 
-    // Ganti placeholder di template
+    // Buat string import relasi
+    const relationImportsCode = relationImports
+        .map(cls => `import { ${cls} } from "./${cls}";`)
+        .join("\n");
+
+    // Ganti placeholder dalam template
     template = template
         .replace(/{{className}}/g, className)
-        .replace(/{{fields}}/g, fieldsDefinition);
+        .replace(/{{fields}}/g, fieldsDefinition)
+        .replace(/{{relationImports}}/g, relationImportsCode) // Tambahkan baris import
+        .replace(/{{relations}}/g, relations);
 
-    // Simpan file model
     const modelPath = path.join("src", "app", "models", `${className}.ts`);
     fs.writeFileSync(modelPath, template);
 }
+//#endregion
 
+//#region Relation
+function detectRelations(tableName, columns, allTables) {
+    let relations = "";
+    let relationImports = new Set(); // Gunakan Set agar tidak ada duplikat
+
+    // 1. Mendeteksi belongsTo (tabel ini memiliki kolom *_id)
+    for (const column of columns) {
+        if (column.Field.endsWith("_id")) {
+            const relatedClass = toPascalCase(column.Field.replace("_id", ""));
+            relationImports.add(relatedClass); // Tambahkan ke daftar import
+
+            relations += `\n    public ${toCamelCase(relatedClass)}() {`;
+            relations += `\n        return this.belongsTo(${relatedClass}, '${column.Field}');`;
+            relations += `\n    }\n`;
+        }
+    }
+
+    // 2. Mendeteksi hasMany (tabel lain memiliki kolom <tableName>_id)
+    for (const otherTable of allTables) {
+        if (otherTable.name !== tableName && !isPivotTable(otherTable.name)) {
+            for (const col of otherTable.columns) {
+                if (col.Field === `${toSingular(tableName)}_id`) {
+                    const relationName = otherTable.name;
+                    const relatedClass = toPascalCase(toSingular(relationName));
+                    relationImports.add(relatedClass); // Tambahkan ke daftar import
+
+                    relations += `\n    public ${toCamelCase(relationName)}() {`;
+                    relations += `\n        return this.hasMany(${relatedClass}, '${col.Field}');`;
+                    relations += `\n    }\n`;
+                }
+            }
+        }
+    }
+
+    return {
+        relations: relations.trim(),
+        relationImports: Array.from(relationImports), // Ubah Set menjadi Array
+    };
+}
+//#endregion
+
+//#region Type Mapper
 function mapTsType(columnType) {
     if (columnType.startsWith("int") || columnType.startsWith("bigint")) return "number";
     if (columnType.startsWith("varchar") || columnType.startsWith("text")) return "string";
@@ -145,7 +210,6 @@ function mapTsType(columnType) {
     if (columnType.startsWith("boolean") || columnType.startsWith("tinyint(1)")) return "boolean";
     return "any"; // Default jika tipe tidak dikenali
 }
-
 
 function mapColumnType(columnType) {
     // if (columnType.startsWith("varchar")) return "string";
@@ -155,17 +219,28 @@ function mapColumnType(columnType) {
     if (columnType.startsWith("timestamp")) return "timestamp";
     return "string";
 }
+//#endregion
 
+//#region Utils
 function toPascalCase(str) {
     return str.replace(/(^\w|_\w)/g, (match) => match.replace(/_/, "").toUpperCase());
 }
 
 function toSingular(str) {
-    // Konversi plural ke singular (contoh sederhana)
-    if (str.endsWith("ies")) return str.replace(/ies$/, "y");
-    if (str.endsWith("s")) return str.replace(/s$/, "");
-    return str;
+    return singularize(str);
 }
 
+function isPivotTable(tableName) {
+    return tableName.includes("_"); // Deteksi pivot berdasarkan nama tabel
+}
+
+function toPlural(str) {
+    return pluralize(str);
+}
+
+function toCamelCase(str) {
+    return str.charAt(0).toLowerCase() + str.slice(1);
+}
+//#endregion
 
 generate();

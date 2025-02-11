@@ -6,6 +6,6 @@ export class ProfileController {
     static index: ControllerAction = async (req, res) => {
         const user = (await User.find(req.userId)) as User;
 
-        res.json(Response.success('Anda berhasil mengakses endpoint ini', await user.load('roles')));
+        res.json(Response.success('Anda berhasil mengakses endpoint ini', await user.load('posts')));
     }
 }

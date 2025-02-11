@@ -3,30 +3,28 @@ const path = require("path");
 const { DB } = require("./DB");
 const { singularize } = require("sequelize/lib/utils");
 
+//#region Constants
 const MAX_RECORDS = process.env.SCAFFOLDING_MAX_RECORD || 100; // Default max record jika tidak diset
 const OUTPUT_DIR = path.join("src", "database", "seeders");
 
 // Path template
 const MODEL_TEMPLATE_PATH = path.join("commands", "templates", "model_seeder.txt");
 const SQL_TEMPLATE_PATH = path.join("commands", "templates", "sql_seeder.txt");
+const DATABASE_SEEDER_TEMPLATE_PATH = path.join("commands", "templates", "database_seeder.txt");
 
 const MODELS_DIR = path.join("src", "app", "models");
+//#endregion
 
-
-// Fungsi untuk mengubah nama tabel menjadi versi singular PascalCase
-function toPascalCaseSingular(tableName) {
-    const singularName = singularize(tableName); // Menggunakan Sequelize untuk mendapatkan bentuk singular
-    return singularName.replace(/_([a-z])/g, (_, c) => c.toUpperCase()).replace(/^./, str => str.toUpperCase());
-}
-
-
+//#region Auto run
 (async () => {
     console.log("Generating seeders...");
     console.log("");
+    console.time('Done');
 
     try {
         const connection = DB;
         const [tables] = await connection.execute("SHOW TABLES");
+        const seederClasses = [];
 
         for (const tableObj of tables) {
             const tableName = Object.values(tableObj)[0];
@@ -50,7 +48,15 @@ function toPascalCaseSingular(tableName) {
                 const filePath = path.join(OUTPUT_DIR, `${className}.ts`);
                 fs.writeFileSync(filePath, seederContent, "utf8");
                 console.log('\x1b[33m%s\x1b[0m', `Seeder generated: ${filePath}`);
+
+                seederClasses.push(className); // Simpan nama kelas seeder
             }
+        }
+
+        // Buat DatabaseSeeder.ts setelah semua seeder selesai dibuat
+        if (seederClasses.length > 0) {
+            generateDatabaseSeeder(seederClasses);
+            console.timeEnd('Done');
         }
 
         await connection.end().finally(() => {
@@ -62,8 +68,30 @@ function toPascalCaseSingular(tableName) {
         console.error("Error generating seeders:", error);
     }
 })();
+//#endregion
 
-// Fungsi untuk menggantikan placeholder di template
+//#region DatabaseSeeder.ts Generator
+// Fungsi untuk membuat DatabaseSeeder.ts
+function generateDatabaseSeeder(seederClasses) {
+
+    console.log('');
+    console.log("Generating DatabaseSeeder.ts...");
+
+    const seederImports = seederClasses.map(cls => `import { ${cls} } from "./${cls}";`).join("\n");
+    const seederList = seederClasses.join(",\n        ");
+
+    const databaseSeederContent = applyTemplate(DATABASE_SEEDER_TEMPLATE_PATH, {
+        seederImports,
+        seederList
+    });
+
+    const filePath = path.join(OUTPUT_DIR, "DatabaseSeeder.ts");
+    fs.writeFileSync(filePath, databaseSeederContent, "utf8");
+}
+//#endregion
+
+//#region Utils
+// Fungsi untuk mengganti placeholder dalam template dengan nilai yang diberikan
 function applyTemplate(templatePath, replacements) {
     let template = fs.readFileSync(templatePath, "utf8");
     return Object.keys(replacements).reduce(
@@ -72,7 +100,14 @@ function applyTemplate(templatePath, replacements) {
     );
 }
 
-// Generator untuk model seeder
+// Fungsi untuk mengubah nama tabel menjadi versi singular PascalCase
+function toPascalCaseSingular(tableName) {
+    const singularName = singularize(tableName); // Menggunakan Sequelize untuk mendapatkan bentuk singular
+    return singularName.replace(/_([a-z])/g, (_, c) => c.toUpperCase()).replace(/^./, str => str.toUpperCase());
+}
+//#endregion
+
+//#region Seeder Generators
 function generateModelSeederContent(className, modelName, records) {
     return applyTemplate(MODEL_TEMPLATE_PATH, {
         className,
@@ -88,3 +123,4 @@ function generateSQLSeederContent(className, tableName, records) {
         records: JSON.stringify(records, null, 4),
     });
 }
+//#endregion
