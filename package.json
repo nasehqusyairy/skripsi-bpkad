@@ -4,15 +4,16 @@
   "description": "",
   "main": "./build/index.js",
   "scripts": {
-    "start": "npm run build && nodemon --env-file=.env ./build/index",
+    "start": "npm run build && node --env-file=.env ./build/index",
+    "watch": "concurrently \"tsc -w\" \"nodemon --env-file=.env ./build/index\"",
     "build": "node ./commands/Build.js",
     "scaffold": "node --env-file=.env ./commands/Scaffolder.js",
     "scaffold:seeder": "node --env-file=.env ./commands/SeedScaffolder.js",
-    "migrate": "node --env-file=.env ./commands/Migrate.js",
-    "migrate:rollback": "node --env-file=.env ./commands/Rollback.js",
-    "migrate:fresh": "npm run build && npm run migrate:rollback && npm run migrate",
-    "seed": "node --env-file=.env ./build/database/seeders/DatabaseSeeder.js",
-    "migrate:fresh-seed": "npm run migrate:fresh && npm run seed"
+    "migrate": "npm run build && node --env-file=.env ./commands/Migrate.js",
+    "migrate:rollback": "npm run build && node --env-file=.env ./commands/Rollback.js",
+    "migrate:fresh": "npm run build && node --env-file=.env ./commands/Rollback.js && node --env-file=.env ./commands/Migrate.js",
+    "seed": "npm run build && node --env-file=.env ./build/database/seeders/DatabaseSeeder.js",
+    "migrate:fresh-seed": "npm run migrate:fresh && node --env-file=.env ./build/database/seeders/DatabaseSeeder.js"
   },
   "keywords": [],
   "author": "Mohammad Nasyikh Al-Qusyairy",
@@ -39,6 +40,7 @@
     "@types/express-flash": "^0.0.5",
     "@types/express-session": "^1.18.1",
     "@types/node": "^22.13.1",
+    "concurrently": "^9.1.2",
     "nodemon": "^3.1.9",
     "sequelize-auto": "^0.8.8",
     "sequelize-cli": "^6.6.2"

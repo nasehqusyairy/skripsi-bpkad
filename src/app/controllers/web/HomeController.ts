@@ -4,8 +4,8 @@ export class HomeController {
     static index: ControllerAction = (req, res) => {
 
         const viewModel = {
-            title: 'Halaman Home',
-            message: 'Server Mitra'
+            title: 'Home Page',
+            message: 'Home Page'
         };
 
         res.render('home/index', viewModel);
