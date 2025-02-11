@@ -2,7 +2,7 @@ import QueryBuilder from 'eloquent-query-builder';
 import { DB, MYSQL } from "@/utils/database/DB";
 import { pluralize } from 'sequelize/lib/utils';
 import { Paginator } from './Paginator';
-import { RowDataPacket } from 'mysql2';
+import { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { HasOne } from './relation/HasOne';
 import { HasMany } from './relation/HasMany';
 import { BelongsTo } from './relation/BelongsTo';
@@ -661,8 +661,8 @@ export class Model<I> {
 
         const query = `INSERT INTO ${this.getTableName()} (${columns.join(", ")}) VALUES (${placeholders})`;
 
-        const [result] = await MYSQL.execute<RowDataPacket[]>(query, values);
-        const insertId = result[0].insertId;
+        const [result] = await MYSQL.execute<ResultSetHeader>(query, values);
+        const insertId = result.insertId;
 
         this.assign({
             ...data,
@@ -672,7 +672,7 @@ export class Model<I> {
         return insertId;
     }
 
-    static async create(data: object) {
+    static async create(data: object): Promise<Model<unknown>> {
         if (typeof data !== "object" || Array.isArray(data)) {
             throw new Error("Data must be an object.");
         }
@@ -683,8 +683,9 @@ export class Model<I> {
 
         const query = `INSERT INTO ${this.getTableName()} (${columns.join(", ")}) VALUES (${placeholders})`;
 
-        const [result] = await MYSQL.execute<RowDataPacket[]>(query, values);
-        const insertId = result[0].insertId;
+        const [result] = await MYSQL.execute<ResultSetHeader>(query, values);
+
+        const insertId = result.insertId;
 
         return new this({
             ...data,
@@ -824,7 +825,9 @@ export class Model<I> {
     // #region Get
     async get(): Promise<this[]> {
         // Ambil data utama
-        let results = await this.DB.table(this.getTableName()).get();
+        this.DB.tbl = this.getTableName();
+
+        let results = await this.DB.get();
 
         // Buat seluruh data menjadi instance model
         const ModelConstructor = this.constructor as { new(attributes: any): Model<I> };
@@ -834,7 +837,9 @@ export class Model<I> {
         if (this._eagerLoading.length > 0) {
             for (const { relation } of this._eagerLoading) {
                 const relationInstance = this[relation]();
-                const ids = results.map((result: Partial<I>) => result[this.primaryKey]);
+
+                const key = relationInstance.constructor.name == "BelongsTo" ? relationInstance.foreignKey : this.primaryKey;
+                const ids = results.map((result: Partial<I>) => result[key]);
 
                 const relatedData = await relationInstance.fetch(ids);
                 relationInstance.attachResults(results, relatedData, relation);
@@ -859,7 +864,9 @@ export class Model<I> {
         // Ambil data relasi
         for (const { relation } of this._eagerLoading) {
             const relationInstance = this[relation]();
-            const ids = [this[this.primaryKey]];
+
+            const key = relationInstance.constructor.name == "BelongsTo" ? relationInstance.foreignKey : this.primaryKey;
+            const ids = [this[key]];
 
             const relatedData = await relationInstance.fetch(ids);
             relationInstance.attachResults([this], relatedData, relation);

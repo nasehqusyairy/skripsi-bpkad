@@ -1,0 +1,44 @@
+import { Post } from "@/app/models/Post";
+import { ControllerAction } from "@/utils/References";
+
+export class PostController {
+    static index: ControllerAction = async (req, res) => {
+        const posts = await Post.with("user").where({ user_id: req.session.userId }).get();
+        res.render("posts/index", { posts });
+    }
+
+    static create: ControllerAction = (req, res) => {
+        res.render("posts/create");
+    }
+
+    static store: ControllerAction = async (req, res) => {
+
+        Post.create({
+            ...req.body,
+            user_id: req.session.userId
+        });
+
+        res.redirect("/posts");
+    }
+
+    static edit: ControllerAction = async (req, res) => {
+        const post = await Post.find(req.params.id);
+        res.render("posts/edit", { post });
+    }
+
+    static update: ControllerAction = async (req, res) => {
+        const post = new Post({
+            ...req.body,
+            id: req.params.id
+        });
+
+        await post.save();
+
+        res.redirect("/posts");
+    }
+
+    static delete: ControllerAction = async (req, res) => {
+        await Post.delete(req.params.id);
+        res.redirect("/posts");
+    }
+}

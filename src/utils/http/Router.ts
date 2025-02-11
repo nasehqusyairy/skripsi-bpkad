@@ -1,4 +1,6 @@
+import { webAuth } from '@/app/middlewares/auth';
 import express from 'express';
+import { Middleware } from '../References';
 
 export type RouterGroupCallback = (router: Router) => void;
 
@@ -23,5 +25,26 @@ export class Router {
         const subRouter = new Router();
         callback(subRouter);
         this.router.use(prefix, subRouter.router);
+    }
+
+    resource(prefix: string, controller: any, middlewares: Middleware[] = []) {
+
+        this.router.get(`/${prefix}`, ...middlewares, controller.index);
+        this.router.get(`/${prefix}/create`, ...middlewares, controller.create);
+        this.router.post(`/${prefix}/store`, ...middlewares, controller.store);
+        this.router.get(`/${prefix}/edit/:id`, ...middlewares, controller.edit);
+        this.router.post(`/${prefix}/update/:id`, ...middlewares, controller.update);
+        this.router.get(`/${prefix}/delete/:id`, ...middlewares, controller.delete);
+        return this;
+    }
+
+    apiResource(prefix: string, controller: any, middlewares: Middleware[] = []) {
+
+        this.router.get(`/${prefix}`, ...middlewares, controller.index);
+        this.router.post(`/${prefix}`, ...middlewares, controller.store);
+        this.router.get(`/${prefix}/:id`, ...middlewares, controller.show);
+        this.router.put(`/${prefix}/:id`, ...middlewares, controller.update);
+        this.router.delete(`/${prefix}/:id`, ...middlewares, controller.delete);
+        return this;
     }
 }

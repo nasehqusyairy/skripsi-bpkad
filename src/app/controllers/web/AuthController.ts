@@ -37,11 +37,10 @@ export class AuthController {
         const { email, password } = req.body;
         const user = (await User.create({
             email,
-            password: bcrypt.hashSync(password, 10)
+            password: bcrypt.hashSync(password)
         })) as User & IUser;
 
         req.session.userId = user.id;
-        // console.log('register', { userId: req.session.userId });
 
         return res.redirect("/dashboard");
     }

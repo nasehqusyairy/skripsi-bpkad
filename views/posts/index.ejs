@@ -1,0 +1,39 @@
+<% layout('layouts/admin') %>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <h1 class="mt-4">My Posts</h1>
+      <div class="card">
+        <div class="card-body">
+          <div class="mb-3">
+            <a href="/posts/create" class="btn btn-primary">New</a>
+          </div>
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Title</th>
+                <th>Created At</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% posts.forEach((post, i) => { %>
+              <tr>
+                <td><%= i + 1 %></td>
+                <td><%= post.title %></td>
+                <td><%= post.created_at %></td>
+                <td>
+                  <a href="/posts/edit/<%= post.id %>" class="btn btn-warning">Edit</a>
+                  <a href="/posts/delete/<%= post.id %>" class="btn btn-danger" onclick="confirm('The selected item will be deleted permanently. Are you sure?')">Delete</a>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

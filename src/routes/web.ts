@@ -1,6 +1,7 @@
 import { AuthController } from "@/app/controllers/web/AuthController";
 import { DashboardController } from "@/app/controllers/web/DashboardController";
 import { HomeController } from "@/app/controllers/web/HomeController";
+import { PostController } from "@/app/controllers/web/PostController";
 import { guest, webAuth } from "@/app/middlewares/auth";
 import { RegisterRequest } from "@/app/requests/web/auth/RegisterRequest";
 import { Router } from "@/utils/http/Router";
@@ -23,5 +24,7 @@ router.group('/auth', (authRouter: Router & express.Router) => {
 });
 
 router.get('/dashboard', webAuth, DashboardController.index);
+
+router.resource('posts', PostController, [webAuth]);
 
 export const webRoutes = router.router;
