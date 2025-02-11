@@ -1,5 +1,5 @@
-import { ControllerAction } from "@/utils/References.js";
-import { IUser, User } from "../../models/User.js";
+import { IUser, User } from '@/app/models/User';
+import { ControllerAction } from '@/utils/References';
 import bcrypt from 'bcryptjs';
 
 export class AuthController {
@@ -17,7 +17,7 @@ export class AuthController {
             return res.redirect("/dashboard");
         }
 
-        req.flash("error", "Username atau Password salah!");
+        req.flash("error", "Wrong email or password!");
         req.flash("old", { email });
         res.redirect("/auth");
     }

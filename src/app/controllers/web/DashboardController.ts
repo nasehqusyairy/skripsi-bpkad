@@ -1,5 +1,5 @@
-import { ControllerAction } from "@/utils/References.js";
-import { IUser, User } from "../../models/User.js";
+import { IUser, User } from "@/app/models/User";
+import { ControllerAction } from "@/utils/References";
 
 export class DashboardController {
     static index: ControllerAction = async (req, res) => {

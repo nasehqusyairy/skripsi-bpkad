@@ -48,7 +48,7 @@ export function handleValidationError(err: Error | ZodError, req: ExpressRequest
         if (jsonResponse) {
             return res.status(422).json(Response.error("Invalid data", formattedErrors));
         } else {
-            req.flash("errors", formattedErrors.toString());
+            req.flash("errors", formattedErrors);
         }
     } else {
         if (jsonResponse) {

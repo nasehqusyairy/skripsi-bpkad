@@ -1,6 +1,7 @@
-import { ControllerAction } from "@/utils/References.js";
-import { Response } from "../../../utils/http/Response.js";
-import { User } from "../../models/User.js";
+import { User } from "@/app/models/User";
+import { Response } from "@/utils/http/Response";
+import { ControllerAction } from "@/utils/References";
+
 
 export class ProfileController {
     static index: ControllerAction = async (req, res) => {

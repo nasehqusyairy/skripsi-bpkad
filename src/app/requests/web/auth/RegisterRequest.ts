@@ -1,6 +1,6 @@
+import { User } from "@/app/models/User";
+import { Validator } from "@/utils/Validator";
 import { z } from "zod";
-import { User } from "../../../models/User.js";
-import { Validator } from "../../../../utils/Validator.js";
 
 class RegisterValidator extends Validator {
 
