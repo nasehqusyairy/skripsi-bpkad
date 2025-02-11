@@ -9,10 +9,10 @@ export class Paginator<T> {
     constructor(paginationResult?: any) {
         if (paginationResult) {
             this.results = paginationResult.result;
-            this.total = paginationResult.pages.pages * paginationResult.pages.perPage;
-            this.currentPage = paginationResult.pages.currentPage;
-            this.perPage = paginationResult.pages.perPage;
-            this.lastPage = paginationResult.pages.lastPage;
+            this.total = paginationResult.pages * paginationResult.perPage;
+            this.currentPage = paginationResult.currentPage;
+            this.perPage = paginationResult.perPage;
+            this.lastPage = paginationResult.lastPage;
         }
     }
 
@@ -41,7 +41,7 @@ export class Paginator<T> {
     }
 
     /**
-     * Mengembalikan representasi JSON dari objek Paginator.
+     * Mengembalikan representasi JSON dari objek Paginator. 
      * @returns {object}
      */
     toJSON(): object {

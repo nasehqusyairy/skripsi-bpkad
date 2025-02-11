@@ -3,8 +3,12 @@ import { ControllerAction } from "@/utils/References";
 
 export class PostController {
     static index: ControllerAction = async (req, res) => {
-        const posts = await Post.with("user").where({ user_id: req.session.userId }).get();
-        res.render("posts/index", { posts });
+
+        const page = req.query.page ? parseInt(req.query.page as string) : 1;
+        const perPage = 5;
+
+        const pagination = await Post.with("user").where({ user_id: req.session.userId }).paginate(page, 5);
+        res.render("posts/index", { pagination });
     }
 
     static create: ControllerAction = (req, res) => {

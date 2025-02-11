@@ -25,6 +25,7 @@ export class Router {
         const subRouter = new Router();
         callback(subRouter);
         this.router.use(prefix, subRouter.router);
+        return this;
     }
 
     resource(prefix: string, controller: any, middlewares: Middleware[] = []) {
