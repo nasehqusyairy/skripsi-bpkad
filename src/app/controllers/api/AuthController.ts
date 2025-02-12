@@ -15,7 +15,7 @@ export class AuthController {
 
         try {
             // Cari pengguna di database
-            const user = (await User.where('email', email).first()) as User & IUser;
+            const user = (await User.where({ email }).first()) as User & IUser;
 
             if (!user) {
                 return res.status(400).json(Response.error('Email tidak ditemukan'));

@@ -6,17 +6,17 @@ export interface IPost {
     user_id: number;
     title?: string;
     content?: string;
-    created_at: Date;
-    updated_at: Date;
+    created_at: string;
+    updated_at: string;
 }
 
 export class Post extends Model<IPost> {
-    constructor(attributes: Partial<IPost>) {
+    constructor(attributes: Partial<IPost> = {}) {
         super(attributes);
     }
 
     // Tambahkan relasi manual di sini jika diperlukan
-    public user() {
+    user() {
         return this.belongsTo(User, 'user_id');
     }
 }

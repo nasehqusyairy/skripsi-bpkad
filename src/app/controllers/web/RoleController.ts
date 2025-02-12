@@ -1,23 +1,17 @@
-import { Post } from "@/app/models/Post";
-import { Response } from "@/utils/http/Response";
+import { Role } from "@/app/models/Role";
 import { ControllerAction } from "@/utils/References";
 
-export class PostController {
+export class RoleController {
     static index: ControllerAction = async (req, res) => {
         const page = req.query.page ? parseInt(req.query.page as string) : 1;
         const perPage = 5;
 
-        const userId = parseInt(req.session.userId.toString());
+        const pagination = await Role.whereNot({ id: 1 }).paginate(page, perPage);
 
-        const pagination = await Post.with("user").where({ user_id: userId }).paginate(page, perPage);
-        const data = [...pagination.results]
-
-        delete pagination.results;
-
-        res.json(Response.success('Data post berhasil diambil! Berikut adalah daftar postingan yang anda buat.', data, pagination));
+        res.render("roles/index", { pagination });
     }
 
-    static show: ControllerAction = (req, res) => {
+    static show: ControllerAction = async (req, res) => {
         // TODO: Implement show logic
     }
 

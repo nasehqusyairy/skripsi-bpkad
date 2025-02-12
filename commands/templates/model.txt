@@ -6,7 +6,7 @@ export interface I{{className}} {
 }
 
 export class {{className}} extends Model<I{{className}}> {
-    constructor(attributes: Partial<I{{className}}>) {
+    constructor(attributes: Partial<I{{className}}> = {}) {
         super(attributes);
     }
 

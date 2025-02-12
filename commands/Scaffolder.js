@@ -172,7 +172,7 @@ function detectRelations(tableName, columns, allTables) {
             const relatedClass = toPascalCase(column.Field.replace("_id", ""));
             relationImports.add(relatedClass); // Tambahkan ke daftar import
 
-            relations += `\n    public ${toCamelCase(relatedClass)}() {`;
+            relations += `\n    ${toCamelCase(relatedClass)}() {`;
             relations += `\n        return this.belongsTo(${relatedClass}, '${column.Field}');`;
             relations += `\n    }\n`;
         }
@@ -187,7 +187,7 @@ function detectRelations(tableName, columns, allTables) {
                     const relatedClass = toPascalCase(toSingular(relationName));
                     relationImports.add(relatedClass); // Tambahkan ke daftar import
 
-                    relations += `\n    public ${toCamelCase(relationName)}() {`;
+                    relations += `\n    ${toCamelCase(relationName)}() {`;
                     relations += `\n        return this.hasMany(${relatedClass}, '${col.Field}');`;
                     relations += `\n    }\n`;
                 }
@@ -206,7 +206,7 @@ function detectRelations(tableName, columns, allTables) {
 function mapTsType(columnType) {
     if (columnType.startsWith("int") || columnType.startsWith("bigint")) return "number";
     if (columnType.startsWith("varchar") || columnType.startsWith("text")) return "string";
-    if (columnType.startsWith("timestamp") || columnType.startsWith("datetime")) return "Date";
+    if (columnType.startsWith("timestamp") || columnType.startsWith("datetime")) return "string";
     if (columnType.startsWith("boolean") || columnType.startsWith("tinyint(1)")) return "boolean";
     return "any"; // Default jika tipe tidak dikenali
 }

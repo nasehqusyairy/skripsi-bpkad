@@ -40,7 +40,7 @@ export class Model<I> {
         return data[0] && this
     }
 
-    static async first() {
+    static async first<T extends Model<unknown>>(this: new () => T): Promise<T | null> {
         const model = new this();
         return await model.first();
     }
@@ -55,7 +55,7 @@ export class Model<I> {
      * @param {number|string} id - Nilai primary key.
      * @returns {Promise<Model<unknown>|null>} - Instance model atau null jika tidak ditemukan.
      */
-    static async find(id: number | string): Promise<Model<unknown> | null> {
+    static async find<T extends Model<unknown>>(this: new () => T, id: number | string): Promise<T | null> {
         const model = new this();
         model.DB.where(model.primaryKey, id);
         return await model.first();
@@ -99,9 +99,8 @@ export class Model<I> {
 
 
     // #region Select
-
-    static select<T extends Model<object>>(...columns: string[]): T {
-        const model = new this() as T;
+    static select<T extends Model<K>, K extends object>(this: new () => T, ...columns: (keyof K)[]): T {
+        const model = new this();
         model.DB.select(...columns);
         return model;
     }
@@ -111,8 +110,8 @@ export class Model<I> {
         return this;
     }
 
-    static distinct<T extends Model<object>>(...columns: string[]): T {
-        const model = new this() as T;
+    static distinct<T extends Model<K>, K extends object>(this: new () => T, ...columns: (keyof K)[]): T {
+        const model = new this();
         model.DB.distinct(...columns);
         return model;
     }
@@ -125,8 +124,8 @@ export class Model<I> {
     // #endregion
 
     // #region Order and Limit
-    static groupBy<T extends Model<object>>(...columns: string[]): T {
-        const model = new this() as T;
+    static groupBy<T extends Model<K>, K extends object>(this: new () => T, ...columns: (keyof K)[]): T {
+        const model = new this();
         model.DB.groupBy(...columns);
         return model;
     }
@@ -136,8 +135,8 @@ export class Model<I> {
         return this;
     }
 
-    static orderBy<T extends Model<object>>(column: string, direction: "ASC" | "DESC" = "ASC"): T {
-        const model = new this() as T;
+    static orderBy<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, direction: "ASC" | "DESC" = "ASC"): T {
+        const model = new this();
         model.DB.orderBy(column, direction);
         return model;
     }
@@ -152,8 +151,8 @@ export class Model<I> {
         return this;
     }
 
-    static limit<T extends Model<object>>(value: number): T {
-        const model = new this() as T;
+    static limit<T extends Model<unknown>>(this: new () => T, value: number): T {
+        const model = new this();
         model.DB.limit(value);
         return model;
     }
@@ -163,8 +162,8 @@ export class Model<I> {
         return this;
     }
 
-    static offset<T extends Model<object>>(value: number): T {
-        const model = new this() as T;
+    static offset<T extends Model<unknown>>(this: new () => T, value: number): T {
+        const model = new this();
         model.DB.offset(value);
         return model;
     }
@@ -213,11 +212,11 @@ export class Model<I> {
 
     // #region Where Static
 
-    static where(column: string, operator: QueryOperator, value: any): Model<any>
-    static where(column: string, value: any): Model<any>
-    static where(args: object): Model<any>
+    static where<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, operator: QueryOperator, value: any): T
+    static where<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, value: any): T
+    static where<T extends Model<K>, K extends object>(this: new () => T, args: Partial<K>): T
 
-    static where(...args: [string, string, any] | [string, any] | [object]) {
+    static where<T extends Model<K>, K extends object>(this: new () => T, ...args: [keyof K, QueryOperator, any] | [keyof K, any] | [Partial<K>]): T {
         const model = new this()
 
         if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
@@ -239,11 +238,12 @@ export class Model<I> {
         return model
     }
 
-    static orWhere(column: string, operator: QueryOperator, value: any): Model<any>
-    static orWhere(column: string, value: any): Model<any>
-    static orWhere(args: object): Model<any>
 
-    static orWhere(...args: [string, string, any] | [string, any] | [object]) {
+    static orWhere<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, operator: QueryOperator, value: any): T
+    static orWhere<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, value: any): T
+    static orWhere<T extends Model<K>, K extends object>(this: new () => T, args: Partial<K>): T
+
+    static orWhere<T extends Model<K>, K extends object>(this: new () => T, ...args: [keyof K, QueryOperator, any] | [keyof K, any] | [Partial<K>]): T {
         const model = new this()
 
         if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
@@ -265,11 +265,11 @@ export class Model<I> {
         return model
     }
 
-    static orWhereNot(column: string, operator: QueryOperator, value: any): Model<any>
-    static orWhereNot(column: string, value: any): Model<any>
-    static orWhereNot(args: object): Model<any>
+    static orWhereNot<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, operator: QueryOperator, value: any): T
+    static orWhereNot<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, value: any): T
+    static orWhereNot<T extends Model<K>, K extends object>(this: new () => T, args: Partial<K>): T
 
-    static orWhereNot(...args: [string, string, any] | [string, any] | [object]) {
+    static orWhereNot<T extends Model<K>, K extends object>(this: new () => T, ...args: [keyof K, QueryOperator, any] | [keyof K, any] | [Partial<K>]): T {
         const model = new this();
 
         if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
@@ -291,23 +291,23 @@ export class Model<I> {
         return model
     }
 
-    static orWhereNull(column: string) {
+    static orWhereNull<T extends Model<K>, K extends object>(this: new () => T, column: keyof K) {
         const model = new this();
         model.DB.orWhereNull(column);
         return model
     }
 
-    static orWhereNotNull(column: string) {
+    static orWhereNotNull<T extends Model<K>, K extends object>(this: new () => T, column: keyof K) {
         const model = new this();
         model.DB.orWhereNotNull(column);
         return model
     }
 
-    static whereNot(column: string, operator: QueryOperator, value: any): Model<any>
-    static whereNot(column: string, value: any): Model<any>
-    static whereNot(args: object): Model<any>
+    static whereNot<T extends Model<K>, K>(this: new () => T, column: keyof K, operator: QueryOperator, value: any): T
+    static whereNot<T extends Model<K>, K>(this: new () => T, column: keyof K, value: any): T
+    static whereNot<T extends Model<K>, K>(this: new () => T, args: Partial<K>): T
 
-    static whereNot(...args: [string, string, any] | [string, any] | [object]) {
+    static whereNot<T extends Model<K>, K>(this: new () => T, ...args: [keyof K, QueryOperator, any] | [keyof K, any] | [Partial<K>]): T {
         const model = new this();
 
         if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
@@ -329,43 +329,43 @@ export class Model<I> {
         return model
     }
 
-    static whereNull(column: string) {
+    static whereNull<T extends Model<K>, K extends object>(this: new () => T, column: keyof K) {
         const model = new this();
         model.DB.whereNull(column);
         return model
     }
 
-    static whereNotNull(column: string) {
+    static whereNotNull<T extends Model<K>, K extends object>(this: new () => T, column: keyof K) {
         const model = new this();
         model.DB.whereNotNull(column);
         return model
     }
 
-    static whereExists(callback: (query: QueryBuilder) => void) {
+    static whereExists<T extends Model<K>, K extends object>(this: new () => T, callback: (query: QueryBuilder) => void) {
         const model = new this();
         model.DB.whereExists(callback);
         return model
     }
 
-    static whereNotExists(callback: (query: QueryBuilder) => void) {
+    static whereNotExists<T extends Model<K>, K extends object>(this: new () => T, callback: (query: QueryBuilder) => void) {
         const model = new this();
         model.DB.whereNotExists(callback);
         return model
     }
 
-    static whereBetween(column: string, values: any[]) {
+    static whereBetween<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, values: [any, any]) {
         const model = new this();
         model.DB.whereBetween(column, values);
         return model
     }
 
-    static whereNotBetween(column: string, values: any[]) {
+    static whereNotBetween<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, values: [any, any]) {
         const model = new this();
         model.DB.whereNotBetween(column, values);
         return model
     }
 
-    static orWhereBetween(column: string, values: any[]) {
+    static orWhereBetween<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, values: [any, any]) {
 
         const [start, end] = values;
 
@@ -374,7 +374,7 @@ export class Model<I> {
         return model
     }
 
-    static orWhereNotBetween(column: string, values: any[]) {
+    static orWhereNotBetween<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, values: [any, any]) {
         const [start, end] = values;
 
         const model = new this();
@@ -382,37 +382,37 @@ export class Model<I> {
         return model
     }
 
-    static whereIn(column: string, values: any[]) {
+    static whereIn<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, values: any[]) {
         const model = new this();
         model.DB.whereIn(column, values);
         return model
     }
 
-    static whereNotIn(column: string, values: any[]) {
+    static whereNotIn<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, values: any[]) {
         const model = new this();
         model.DB.whereNotIn(column, values);
         return model
     }
 
-    static whereLike(column: string, value: any) {
+    static whereLike<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, value: any) {
         const model = new this();
         model.DB.where(column, "LIKE", value);
         return model
     }
 
-    static whereNotLike(column: string, value: any) {
+    static whereNotLike<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, value: any) {
         const model = new this();
         model.DB.where(column, "NOT LIKE", value);
         return model
     }
 
-    static orWhereLike(column: string, value: any) {
+    static orWhereLike<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, value: any) {
         const model = new this();
         model.DB.orWhere(column, "LIKE", value);
         return model
     }
 
-    static orWhereNotLike(column: string, value: any) {
+    static orWhereNotLike<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, value: any) {
         const model = new this();
         model.DB.orWhere(column, "NOT LIKE", value);
         return model
@@ -657,64 +657,56 @@ export class Model<I> {
         return insertId;
     }
 
-    static async create(data: object): Promise<Model<unknown>> {
-        if (typeof data !== "object" || Array.isArray(data)) {
-            throw new Error("Data must be an object.");
-        }
-
+    static async create<T extends Model<K>, K extends object>(this: new () => T, data: Partial<K>): Promise<T> {
         const columns = Object.keys(data);
         const placeholders = columns.map(() => "?").join(", ");
         const values = Object.values(data);
 
-        const query = `INSERT INTO ${this.getTableName()} (${columns.join(", ")}) VALUES (${placeholders})`;
+        const modelInstance = new this()
+
+        const query = `INSERT INTO ${modelInstance.getTableName()} (${columns.join(", ")}) VALUES (${placeholders})`;
 
         const [result] = await MYSQL.execute<ResultSetHeader>(query, values);
 
         const insertId = result.insertId;
 
-        return new this({
+        modelInstance.assign({
             ...data,
-            [this.getPrimaryKey()]: insertId
-        });
+            [modelInstance.getPrimaryKey()]: insertId
+        })
+
+        return modelInstance;
     }
 
 
-    static async insert(dataArray: object[]) {
-        if (!Array.isArray(dataArray)) {
-            throw new Error("Data must be an array of objects.");
-        }
+    static async insert<T extends Model<K>, K extends object>(this: new () => T, dataArray: Partial<K>[]) {
+        const columns = Object.keys(dataArray[0]);
+        const placeholders = dataArray.map(() => `(${columns.map(() => "?").join(", ")})`).join(", ");
+        const values = dataArray.flatMap(Object.values);
 
-        if (dataArray.length === 0) {
-            throw new Error("Data array cannot be empty.");
-        }
+        const modelInstance = new this();
 
-        // Ambil kolom dari objek pertama
-        const columns = Object.keys(dataArray[0]).join(", ");
-
-        // Format nilai untuk setiap objek
-        const values = dataArray
-            .map(data => {
-                const rowValues = Object.values(data).map(value => `'${value}'`).join(", ");
-                return `(${rowValues})`;
-            })
-            .join(", ");
-
-        const query = `INSERT INTO ${this.getTableName()} (${columns}) VALUES ${values}`;
-        const { affectedRows } = (await MYSQL.query(query))[0] as RowDataPacket;
-        return affectedRows; // Mengembalikan jumlah baris yang berhasil ditambahkan
+        const query = `INSERT INTO ${modelInstance.getTableName()} (${columns.join(", ")}) VALUES ${placeholders}`;
+        const [{ affectedRows }] = await MYSQL.execute<ResultSetHeader>(query, values);
+        return affectedRows;
     }
+
 
     // #region Delete
 
     async delete() {
         const whereClause = this.DB.getRaw().replace("SELECT *", "").replace("from " + this.getTableName(), "").trim();
 
-        const query = `DELETE FROM ${this.getTableName()} ${whereClause}`;
+        if (!whereClause) {
+            throw new Error("DELETE operation requires a WHERE clause to prevent full table deletion.");
+        }
 
-        const { affectedRows } = (await MYSQL.query(query))[0] as RowDataPacket;
+        const query = `DELETE FROM ${this.getTableName()} ${whereClause}`;
+        const [{ affectedRows }] = await MYSQL.execute<ResultSetHeader>(query);
 
         return affectedRows;
     }
+
 
     static async delete(id: number | string) {
         const model = new this();
@@ -776,15 +768,11 @@ export class Model<I> {
     // #region With
 
     // Method untuk eager loading, simpan nama relasi beserta objek relasi yang dikembalikan
-    static with(relations: string | string[]) {
-        if (!Array.isArray(relations)) {
-            relations = [relations];
-        }
-
+    static with<T extends Model<unknown>>(this: new () => T, ...relations: (keyof T)[]) {
         const modelInstance = new this();
         modelInstance._eagerLoading = relations.map(relation => {
             // Mengambil objek relasi dari setiap fungsi relasi
-            const relationObj = modelInstance[relation]();
+            const relationObj = (modelInstance as any)[relation]();
 
             return { relation, ...relationObj };
         });
@@ -792,11 +780,7 @@ export class Model<I> {
         return modelInstance;
     }
 
-    with<T extends keyof this>(relations: T | T[]): this {
-        if (!Array.isArray(relations)) {
-            relations = [relations];
-        }
-
+    with<T extends keyof this>(...relations: T[]): this {
         this._eagerLoading = relations.map(relation => {
             const relationObj = (this[relation] as Function)();
             return { relation, ...relationObj };
@@ -855,11 +839,7 @@ export class Model<I> {
     // #endregion
 
     // #region Load
-    async load<T extends keyof this>(relations: T | T[]): Promise<this> {
-        if (!Array.isArray(relations)) {
-            relations = [relations];
-        }
-
+    async load<T extends keyof this>(...relations: T[]): Promise<this> {
         this._eagerLoading = relations.map(relation => {
             const relationObj = (this[relation] as Function)();
             return { relation, ...relationObj };
