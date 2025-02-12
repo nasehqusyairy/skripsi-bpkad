@@ -8,10 +8,14 @@ export interface IRole {
     updated_at: string;
 }
 
-export class Role extends Model<IRole> {
+export class Role extends Model<IRole> implements IRole {
     constructor(attributes: Partial<IRole> = {}) {
         super(attributes);
     }
+    id: number;
+    name?: string;
+    created_at: string;
+    updated_at: string;
 
     // Tambahkan relasi manual di sini jika diperlukan
 

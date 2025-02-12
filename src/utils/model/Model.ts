@@ -99,7 +99,7 @@ export class Model<I> {
 
 
     // #region Select
-    static select<T extends Model<K>, K extends object>(this: new () => T, ...columns: (keyof K)[]): T {
+    static select<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, ...columns: (keyof K)[]): T {
         const model = new this();
         model.DB.select(...columns);
         return model;
@@ -110,7 +110,7 @@ export class Model<I> {
         return this;
     }
 
-    static distinct<T extends Model<K>, K extends object>(this: new () => T, ...columns: (keyof K)[]): T {
+    static distinct<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, ...columns: (keyof K)[]): T {
         const model = new this();
         model.DB.distinct(...columns);
         return model;
@@ -124,7 +124,7 @@ export class Model<I> {
     // #endregion
 
     // #region Order and Limit
-    static groupBy<T extends Model<K>, K extends object>(this: new () => T, ...columns: (keyof K)[]): T {
+    static groupBy<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, ...columns: (keyof K)[]): T {
         const model = new this();
         model.DB.groupBy(...columns);
         return model;
@@ -135,7 +135,7 @@ export class Model<I> {
         return this;
     }
 
-    static orderBy<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, direction: "ASC" | "DESC" = "ASC"): T {
+    static orderBy<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, direction: "ASC" | "DESC" = "ASC"): T {
         const model = new this();
         model.DB.orderBy(column, direction);
         return model;
@@ -212,11 +212,11 @@ export class Model<I> {
 
     // #region Where Static
 
-    static where<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, operator: QueryOperator, value: any): T
-    static where<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, value: any): T
-    static where<T extends Model<K>, K extends object>(this: new () => T, args: Partial<K>): T
+    static where<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, operator: QueryOperator, value: any): T
+    static where<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, value: any): T
+    static where<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, args: Partial<K>): T
 
-    static where<T extends Model<K>, K extends object>(this: new () => T, ...args: [keyof K, QueryOperator, any] | [keyof K, any] | [Partial<K>]): T {
+    static where<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, ...args: [keyof K, QueryOperator, any] | [keyof K, any] | [Partial<K>]): T {
         const model = new this()
 
         if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
@@ -239,11 +239,11 @@ export class Model<I> {
     }
 
 
-    static orWhere<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, operator: QueryOperator, value: any): T
-    static orWhere<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, value: any): T
-    static orWhere<T extends Model<K>, K extends object>(this: new () => T, args: Partial<K>): T
+    static orWhere<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, operator: QueryOperator, value: any): T
+    static orWhere<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, value: any): T
+    static orWhere<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, args: Partial<K>): T
 
-    static orWhere<T extends Model<K>, K extends object>(this: new () => T, ...args: [keyof K, QueryOperator, any] | [keyof K, any] | [Partial<K>]): T {
+    static orWhere<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, ...args: [keyof K, QueryOperator, any] | [keyof K, any] | [Partial<K>]): T {
         const model = new this()
 
         if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
@@ -265,11 +265,11 @@ export class Model<I> {
         return model
     }
 
-    static orWhereNot<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, operator: QueryOperator, value: any): T
-    static orWhereNot<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, value: any): T
-    static orWhereNot<T extends Model<K>, K extends object>(this: new () => T, args: Partial<K>): T
+    static orWhereNot<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, operator: QueryOperator, value: any): T
+    static orWhereNot<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, value: any): T
+    static orWhereNot<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, args: Partial<K>): T
 
-    static orWhereNot<T extends Model<K>, K extends object>(this: new () => T, ...args: [keyof K, QueryOperator, any] | [keyof K, any] | [Partial<K>]): T {
+    static orWhereNot<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, ...args: [keyof K, QueryOperator, any] | [keyof K, any] | [Partial<K>]): T {
         const model = new this();
 
         if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
@@ -291,13 +291,13 @@ export class Model<I> {
         return model
     }
 
-    static orWhereNull<T extends Model<K>, K extends object>(this: new () => T, column: keyof K) {
+    static orWhereNull<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K) {
         const model = new this();
         model.DB.orWhereNull(column);
         return model
     }
 
-    static orWhereNotNull<T extends Model<K>, K extends object>(this: new () => T, column: keyof K) {
+    static orWhereNotNull<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K) {
         const model = new this();
         model.DB.orWhereNotNull(column);
         return model
@@ -329,43 +329,43 @@ export class Model<I> {
         return model
     }
 
-    static whereNull<T extends Model<K>, K extends object>(this: new () => T, column: keyof K) {
+    static whereNull<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K) {
         const model = new this();
         model.DB.whereNull(column);
         return model
     }
 
-    static whereNotNull<T extends Model<K>, K extends object>(this: new () => T, column: keyof K) {
+    static whereNotNull<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K) {
         const model = new this();
         model.DB.whereNotNull(column);
         return model
     }
 
-    static whereExists<T extends Model<K>, K extends object>(this: new () => T, callback: (query: QueryBuilder) => void) {
+    static whereExists<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, callback: (query: QueryBuilder) => void) {
         const model = new this();
         model.DB.whereExists(callback);
         return model
     }
 
-    static whereNotExists<T extends Model<K>, K extends object>(this: new () => T, callback: (query: QueryBuilder) => void) {
+    static whereNotExists<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, callback: (query: QueryBuilder) => void) {
         const model = new this();
         model.DB.whereNotExists(callback);
         return model
     }
 
-    static whereBetween<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, values: [any, any]) {
+    static whereBetween<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, values: [any, any]) {
         const model = new this();
         model.DB.whereBetween(column, values);
         return model
     }
 
-    static whereNotBetween<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, values: [any, any]) {
+    static whereNotBetween<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, values: [any, any]) {
         const model = new this();
         model.DB.whereNotBetween(column, values);
         return model
     }
 
-    static orWhereBetween<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, values: [any, any]) {
+    static orWhereBetween<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, values: [any, any]) {
 
         const [start, end] = values;
 
@@ -374,7 +374,7 @@ export class Model<I> {
         return model
     }
 
-    static orWhereNotBetween<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, values: [any, any]) {
+    static orWhereNotBetween<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, values: [any, any]) {
         const [start, end] = values;
 
         const model = new this();
@@ -382,37 +382,37 @@ export class Model<I> {
         return model
     }
 
-    static whereIn<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, values: any[]) {
+    static whereIn<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, values: any[]) {
         const model = new this();
         model.DB.whereIn(column, values);
         return model
     }
 
-    static whereNotIn<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, values: any[]) {
+    static whereNotIn<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, values: any[]) {
         const model = new this();
         model.DB.whereNotIn(column, values);
         return model
     }
 
-    static whereLike<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, value: any) {
+    static whereLike<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, value: any) {
         const model = new this();
         model.DB.where(column, "LIKE", value);
         return model
     }
 
-    static whereNotLike<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, value: any) {
+    static whereNotLike<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, value: any) {
         const model = new this();
         model.DB.where(column, "NOT LIKE", value);
         return model
     }
 
-    static orWhereLike<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, value: any) {
+    static orWhereLike<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, value: any) {
         const model = new this();
         model.DB.orWhere(column, "LIKE", value);
         return model
     }
 
-    static orWhereNotLike<T extends Model<K>, K extends object>(this: new () => T, column: keyof K, value: any) {
+    static orWhereNotLike<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, value: any) {
         const model = new this();
         model.DB.orWhere(column, "NOT LIKE", value);
         return model
@@ -423,11 +423,11 @@ export class Model<I> {
 
     // #region Where Instance
 
-    where<T extends Model<I>>(column: string, operator: QueryOperator, value: any): T
-    where<T extends Model<I>>(column: string, value: any): T
-    where<T extends Model<I>>(args: Partial<I>): T
+    where(column: keyof I, operator: QueryOperator, value: any): this
+    where(column: keyof I, value: any): this
+    where(args: Partial<I>): this
 
-    where(...args: [string, string, any] | [string, any] | [Partial<I>]) {
+    where(...args: [keyof I, QueryOperator, any] | [keyof I, any] | [Partial<I>]) {
 
         if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
             // Handle kondisi key-value
@@ -449,11 +449,11 @@ export class Model<I> {
         return this;
     }
 
-    orWhere<T extends Model<I>>(column: string, operator: QueryOperator, value: any): T
-    orWhere<T extends Model<I>>(column: string, value: any): T
-    orWhere<T extends Model<I>>(args: Partial<I>): T
+    orWhere(column: keyof I, operator: QueryOperator, value: any): this
+    orWhere(column: keyof I, value: any): this
+    orWhere(args: Partial<I>): this
 
-    orWhere(...args: [string, string, any] | [string, any] | [Partial<I>]) {
+    orWhere(...args: [keyof I, QueryOperator, any] | [keyof I, any] | [Partial<I>]) {
 
         if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
             // Handle kondisi key-value
@@ -475,11 +475,11 @@ export class Model<I> {
         return this;
     }
 
-    orWhereNot<T extends Model<I>>(column: string, operator: QueryOperator, value: any): T
-    orWhereNot<T extends Model<I>>(column: string, value: any): T
-    orWhereNot<T extends Model<I>>(args: Partial<I>): T
+    orWhereNot(column: keyof I, operator: QueryOperator, value: any): this
+    orWhereNot(column: keyof I, value: any): this
+    orWhereNot(args: Partial<I>): this
 
-    orWhereNot(...args: [string, string, any] | [string, any] | [Partial<I>]) {
+    orWhereNot(...args: [keyof I, QueryOperator, any] | [keyof I, any] | [Partial<I>]) {
 
         if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
             // Handle kondisi key-value
@@ -511,11 +511,11 @@ export class Model<I> {
         return this;
     }
 
-    whereNot<T extends Model<I>>(column: string, operator: QueryOperator, value: any): T
-    whereNot<T extends Model<I>>(column: string, value: any): T
-    whereNot<T extends Model<I>>(args: Partial<I>): T
+    whereNot(column: keyof I, operator: QueryOperator, value: any): this
+    whereNot(column: keyof I, value: any): this
+    whereNot(args: Partial<I>): this
 
-    whereNot(...args: [string, string, any] | [string, any] | [Partial<I>]) {
+    whereNot(...args: [keyof I, QueryOperator, any] | [keyof I, any] | [Partial<I>]) {
 
         if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
             // Handle kondisi key-value
@@ -614,7 +614,10 @@ export class Model<I> {
     async save() {
         if (this[this.getPrimaryKey()]) {
             // Jika primary key ada, lakukan update
-            await this.where(this.getPrimaryKey(), this[this.getPrimaryKey()]).update(this.attributes);
+
+            const primaryKey = this.getPrimaryKey() as keyof I;
+
+            await this.where(primaryKey, (this as this & I)[primaryKey]).update(this.attributes);
         } else {
             // Jika primary key tidak ada, lakukan insert
             await this.create(this.attributes);
@@ -657,7 +660,7 @@ export class Model<I> {
         return insertId;
     }
 
-    static async create<T extends Model<K>, K extends object>(this: new () => T, data: Partial<K>): Promise<T> {
+    static async create<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, data: Partial<K>): Promise<T> {
         const columns = Object.keys(data);
         const placeholders = columns.map(() => "?").join(", ");
         const values = Object.values(data);
@@ -679,7 +682,7 @@ export class Model<I> {
     }
 
 
-    static async insert<T extends Model<K>, K extends object>(this: new () => T, dataArray: Partial<K>[]) {
+    static async insert<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, dataArray: Partial<K>[]) {
         const columns = Object.keys(dataArray[0]);
         const placeholders = dataArray.map(() => `(${columns.map(() => "?").join(", ")})`).join(", ");
         const values = dataArray.flatMap(Object.values);
@@ -708,9 +711,9 @@ export class Model<I> {
     }
 
 
-    static async delete(id: number | string) {
+    static async delete<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, id: number | string) {
         const model = new this();
-        return await model.where(model.primaryKey, id).delete();
+        return await model.where(model.primaryKey as keyof K, id).delete();
     }
 
     // #endregion
@@ -819,7 +822,7 @@ export class Model<I> {
         await this.eagerLoadRelations(pagination.result);
 
         // Kembalikan instance Paginator
-        return new Paginator(pagination);
+        return new Paginator<this>(pagination);
     }
 
     private async eagerLoadRelations(results: this[]) {

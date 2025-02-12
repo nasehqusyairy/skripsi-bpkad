@@ -5,10 +5,13 @@ export interface I{{className}} {
 {{fields}}
 }
 
-export class {{className}} extends Model<I{{className}}> {
+export class {{className}} extends Model<I{{className}}> implements I{{className}} {
     constructor(attributes: Partial<I{{className}}> = {}) {
         super(attributes);
     }
+
+    // implementasi interface
+    {{fields}}
 
     // Tambahkan relasi manual di sini jika diperlukan
     {{relations}}

@@ -10,7 +10,7 @@ export class AuthController {
 
     static login: ControllerAction = async (req, res) => {
         const { email, password } = req.body;
-        const user = (await User.where({ email }).first()) as User & IUser;
+        const user = await User.where({ email }).first();
 
         if (user && bcrypt.compareSync(password, user.password)) {
             req.session.userId = user.id;
@@ -35,10 +35,10 @@ export class AuthController {
 
     static register: ControllerAction = async (req, res) => {
         const { email, password } = req.body;
-        const user = (await User.create({
+        const user = await User.create({
             email,
             password: bcrypt.hashSync(password)
-        })) as User & IUser;
+        })
 
         req.session.userId = user.id;
 
