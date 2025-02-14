@@ -23,6 +23,8 @@ router.group('/auth', (authRouter: Router & express.Router) => {
     authRouter.get('/logout', apiAuth, AuthController.logout);
 });
 
-router.apiResource('posts', PostController, [apiAuth])
+router.use(apiAuth);
+
+router.apiResource('posts', PostController);
 
 export const apiRoutes = router.router;

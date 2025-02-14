@@ -18,4 +18,4 @@ class {{name}}Validator extends Validator {
 
 }
 
-export const {{name}}Request = new {{name}}Validator();
+export const {{name}}Request = new {{name}}Validator().validate;

@@ -601,16 +601,35 @@ export class Model<I> {
         return this;
     }
 
-    whereIn<K extends keyof I>(column: K, values: any[]) {
-        this.DB.whereIn(column, values);
+    whereIn(conditions: { [P in keyof I]?: any[] }): this {
+        // Periksa apakah this.DB.query sudah memiliki klausa WHERE
+        let hasWhereClause = /\bwhere\b/i.test(this.DB.getRaw());
+
+        for (const column in conditions) {
+            if (conditions[column] !== undefined) {
+                // Jika sudah ada WHERE, tambahkan AND, jika belum tambahkan WHERE
+                this.DB.query += hasWhereClause ? " AND " : "";
+                this.DB.whereIn(column, conditions[column]!);
+
+                // Setelah pertama kali menambahkan WHERE, kita set agar selalu menambahkan AND berikutnya
+                hasWhereClause = true;
+            }
+        }
         return this;
     }
 
     whereNotIn(conditions: { [P in keyof I]?: any[] }): this {
-        this.DB.query += " AND ";
+        // Periksa apakah this.DB.query sudah memiliki klausa WHERE
+        let hasWhereClause = /\bwhere\b/i.test(this.DB.getRaw());
+
         for (const column in conditions) {
             if (conditions[column] !== undefined) {
+                // Jika sudah ada WHERE, tambahkan AND, jika belum tambahkan WHERE
+                this.DB.query += hasWhereClause ? " AND " : "";
                 this.DB.whereNotIn(column, conditions[column]!);
+
+                // Setelah pertama kali menambahkan WHERE, kita set agar selalu menambahkan AND berikutnya
+                hasWhereClause = true;
             }
         }
         return this;

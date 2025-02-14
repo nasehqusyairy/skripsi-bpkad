@@ -8,12 +8,16 @@ class RoleValidator extends Validator {
 
     // Definisi aturan validasi
     rules() {
+        console.log("RoleValidator");
+
         return z.object({
             // pengecekan input
             name: z.string(),
             id: z.preprocess(val => parseInt(z.string().parse(val)), z.number()).optional()
 
         }).superRefine(async ({ name, id }, ctx) => {
+            console.log({ name, id });
+
             // pengecekan database
             const query = Role.where({ name });
             if (id) {
@@ -32,4 +36,4 @@ class RoleValidator extends Validator {
 
 }
 
-export const RoleRequest = new RoleValidator();
+export const RoleRequest = new RoleValidator().validate;

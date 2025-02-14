@@ -17,6 +17,13 @@
                 <option value="<%= role.id %>"><%= role.name %></option>
                 <% }) %>
               </select>
+              <ul>
+                <% errors('role_id').forEach(error => { %>
+                <li class="text-danger">
+                  <small><%= error %></small>
+                </li>
+                <% }) %>
+              </ul>
             </div>
             <button type="submit" class="btn btn-primary">Assign</button>
             <a href="/users" class="btn btn-secondary">Back</a>

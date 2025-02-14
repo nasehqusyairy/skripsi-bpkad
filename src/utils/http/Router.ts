@@ -1,8 +1,19 @@
-import { webAuth } from '@/app/middlewares/auth';
 import express from 'express';
-import { Middleware } from '../References';
+import { ControllerAction, Middleware } from '../References';
+import { WebResource } from './WebResource';
+import { ApiResource } from './ApiResource';
 
 export type RouterGroupCallback = (router: Router) => void;
+
+export type ResourceController = {
+    index: ControllerAction;
+    show: ControllerAction;
+    create: ControllerAction;
+    store: ControllerAction;
+    edit: ControllerAction;
+    update: ControllerAction;
+    delete: ControllerAction;
+}
 
 export class Router {
 
@@ -28,42 +39,30 @@ export class Router {
         return this;
     }
 
-    resource(prefix: string, controller: any, middlewares: Middleware[] = []) {
-        const routes = [
-            { method: "get", path: `/${prefix}`, action: "index" },
-            { method: "get", path: `/${prefix}/show/:id`, action: "show" },
-            { method: "get", path: `/${prefix}/create`, action: "create" },
-            { method: "post", path: `/${prefix}/store`, action: "store" },
-            { method: "get", path: `/${prefix}/edit/:id`, action: "edit" },
-            { method: "post", path: `/${prefix}/update/:id`, action: "update" },
-            { method: "get", path: `/${prefix}/delete/:id`, action: "delete" },
-        ];
+    resource(prefix: string, controller: Partial<ResourceController>, middlewares: Middleware[] = []) {
+        const resource = new WebResource(this.router, prefix, controller, middlewares);
+        const routes = resource.getRoutes();
 
         for (const route of routes) {
             if (typeof controller[route.action] === "function") {
-                this.router[route.method](route.path, ...middlewares, controller[route.action]);
+                this.router[route.method](route.path, ...route.middlewares, controller[route.action]);
             }
         }
 
-        return this;
+        return resource;
     }
 
-    apiResource(prefix: string, controller: any, middlewares: Middleware[] = []) {
-        const routes = [
-            { method: "get", path: `/${prefix}`, action: "index" },
-            { method: "post", path: `/${prefix}`, action: "store" },
-            { method: "get", path: `/${prefix}/:id`, action: "show" },
-            { method: "put", path: `/${prefix}/:id`, action: "update" },
-            { method: "delete", path: `/${prefix}/:id`, action: "delete" },
-        ];
+    apiResource(prefix: string, controller: Partial<ResourceController>, middlewares: Middleware[] = []) {
+        const resource = new ApiResource(this.router, prefix, controller, middlewares);
+        const routes = resource.getRoutes();
 
         for (const route of routes) {
             if (typeof controller[route.action] === "function") {
-                this.router[route.method](route.path, ...middlewares, controller[route.action]);
+                this.router[route.method](route.path, ...route.middlewares, controller[route.action]);
             }
         }
 
-        return this;
+        return resource;
     }
 
 }

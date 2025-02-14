@@ -5,10 +5,11 @@ import session from 'express-session';
 import path from 'path';
 import engine from 'ejs-mate';
 import flash from 'express-flash';
+
+const app = express();
+
 import { webRoutes } from '@/routes/web';
 import { apiRoutes } from '@/routes/api';
-
-export const app = express();
 
 // Middleware untuk mengakses folder public
 app.use(express.static(path.join(__dirname, "../public")));
@@ -52,11 +53,11 @@ app.use((req, res, next) => {
     next();
 });
 
-app.locals.title = "Server Mitra";
+app.locals.title = "My App";
 
 // Gunakan routes
-app.use('/', webRoutes);
 app.use('/api', apiRoutes);
+app.use('/', webRoutes);
 
 
 // Jalankan server

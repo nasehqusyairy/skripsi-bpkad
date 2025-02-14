@@ -1,6 +1,7 @@
 import { ZodError } from "zod";
 import { Response as ExpressResponse, Request as ExpressRequest, NextFunction } from 'express';
 import { Response } from "@/utils/http/Response";
+import { Middleware } from "./References";
 
 export abstract class Validator {
 
@@ -8,8 +9,7 @@ export abstract class Validator {
 
     abstract rules(): any;
 
-    public validate = async (req: ExpressRequest, res: ExpressResponse, next: NextFunction) => {
-
+    public validate: Middleware = async (req, res, next) => {
         try {
             const schema = this.rules();
             const validatedData = await schema.parseAsync(req.body); // Validasi data

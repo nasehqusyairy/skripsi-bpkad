@@ -25,7 +25,17 @@
               <tr>
                 <td><%= startIndex + i + 1 %></td>
                 <td><%= u.email %></td>
-                <td><%= u.roles.map(role=>role.name).join(', ') || '-'%></td>
+                <td>
+                  <% if (u.roles.length > 0) { %>
+                  <% u.roles.forEach(role => { %>
+                  <span class="badge text-bg-secondary">
+                    <%= role.name %>
+                  </span>
+                  <% }); %>
+                  <% } else { %>
+                  -
+                  <% } %>
+                </td>
                 <td><%= u.created_at %></td>
                 <td>
                   <a href="/users/roles/<%= u.id %>" class="btn btn-info">Assign Role</a>

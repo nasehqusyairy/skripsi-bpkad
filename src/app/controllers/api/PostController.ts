@@ -7,7 +7,7 @@ export class PostController {
         const page = req.query.page ? parseInt(req.query.page as string) : 1;
         const perPage = 5;
 
-        const userId = parseInt(req.session.userId.toString());
+        const userId = parseInt(req.userId.toString());
 
         const pagination = await Post.with("user").where({ user_id: userId }).paginate(page, perPage);
         const data = [...pagination.results]

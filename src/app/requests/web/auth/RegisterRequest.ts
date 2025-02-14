@@ -34,4 +34,4 @@ class RegisterValidator extends Validator {
 
 }
 
-export const RegisterRequest = new RegisterValidator();
+export const RegisterRequest = new RegisterValidator().validate;

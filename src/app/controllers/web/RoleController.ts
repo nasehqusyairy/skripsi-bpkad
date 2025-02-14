@@ -11,10 +11,6 @@ export class RoleController {
         res.render("roles/index", { pagination });
     }
 
-    static show: ControllerAction = async (req, res) => {
-        // TODO: Implement show logic
-    }
-
     static create: ControllerAction = (req, res) => {
         res.render("roles/create");
     }
