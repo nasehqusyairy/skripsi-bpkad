@@ -21,6 +21,12 @@
         <div class="navbar-nav">
           <a class="nav-link" href="/dashboard">Dashboard</a>
           <a class="nav-link" href="/posts">Posts</a>
+
+          <% if(user.roles.includes('admin')){%>
+          <a class="nav-link" href="/users">Users</a>
+          <a class="nav-link" href="/roles">Roles</a>
+          <% } %>
+
           <!-- Button trigger modal -->
           <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#logoutModal">
             Log Out

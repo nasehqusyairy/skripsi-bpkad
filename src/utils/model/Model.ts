@@ -14,6 +14,8 @@ export class Model<I> {
 
     protected tableName: string = "";
 
+    protected prefix: string = "";
+
     protected primaryKey: string = "id";
 
     protected hidden: string[] = [];
@@ -28,16 +30,28 @@ export class Model<I> {
 
     constructor(attributes: Partial<I> = {}) {
         this.assign(attributes);
-        this.DB = DB.table(this.getTableName());
+        this.DB = Object.assign(Object.create(Object.getPrototypeOf(DB)), DB).table(this.getTableName());
     }
 
     // #region Static Helpers
-    async first() {
-        // console.log(await this.DB.first());
+    async first(): Promise<this | null> {
+        // Ambil data pertama dari database
         const data = await this.DB.first();
-        this.assign(data[0]);
 
-        return data[0] && this
+        // Jika data ditemukan
+        if (data && data[0]) {
+            // Ubah result menjadi instance model
+            this.assign(data[0]);
+
+            // Lakukan eager loading
+            await this.eagerLoadRelations([this]);
+
+            // Kembalikan instance model
+            return this;
+        }
+
+        // Jika data tidak ditemukan, kembalikan null
+        return null;
     }
 
     static async first<T extends Model<unknown>>(this: new () => T): Promise<T | null> {
@@ -81,9 +95,9 @@ export class Model<I> {
     }
 
     getTableName() {
-        return this.tableName && this.tableName.trim() !== ""
+        return this.prefix + (this.tableName && this.tableName.trim() !== ""
             ? this.tableName
-            : pluralize(this.constructor.name.toLowerCase()); // Pluralisasi otomatis berdasarkan nama class
+            : pluralize(this.constructor.name.toLowerCase())); // Pluralisasi otomatis berdasarkan nama class
     }
 
     getPrimaryKey() {
@@ -388,11 +402,19 @@ export class Model<I> {
         return model
     }
 
-    static whereNotIn<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, values: any[]) {
+    static whereNotIn<T extends Model<K>, K extends object>(
+        this: new (attributes?: Partial<K>) => T,
+        conditions: { [P in keyof K]?: any[] }
+    ) {
         const model = new this();
-        model.DB.whereNotIn(column, values);
-        return model
+        for (const column in conditions) {
+            if (conditions[column] !== undefined) {
+                model.DB.whereNotIn(column, conditions[column]!);
+            }
+        }
+        return model;
     }
+
 
     static whereLike<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, value: any) {
         const model = new this();
@@ -584,8 +606,13 @@ export class Model<I> {
         return this;
     }
 
-    whereNotIn<K extends keyof I>(column: K, values: any[]) {
-        this.DB.whereNotIn(column, values);
+    whereNotIn(conditions: { [P in keyof I]?: any[] }): this {
+        this.DB.query += " AND ";
+        for (const column in conditions) {
+            if (conditions[column] !== undefined) {
+                this.DB.whereNotIn(column, conditions[column]!);
+            }
+        }
         return this;
     }
 
@@ -698,9 +725,13 @@ export class Model<I> {
     // #region Delete
 
     async delete() {
-        const whereClause = this.DB.getRaw().replace("SELECT *", "").replace("from " + this.getTableName(), "").trim();
 
-        if (!whereClause) {
+        const id = this[this.primaryKey]
+        let whereClause = this.DB.getRaw().replace("SELECT *", "").replace("from " + this.getTableName(), "").trim();
+
+        if (id) {
+            whereClause = `WHERE ${this.primaryKey} = ${id}`;
+        } else if (!whereClause) {
             throw new Error("DELETE operation requires a WHERE clause to prevent full table deletion.");
         }
 
@@ -797,7 +828,6 @@ export class Model<I> {
     // #region Get
     async get(): Promise<this[]> {
         // Ambil data utama
-        this.DB.tbl = this.getTableName();
         let results = await this.DB.get();
 
         // Buat seluruh data menjadi instance model
@@ -811,7 +841,6 @@ export class Model<I> {
     }
 
     async paginate(page: number, perPage: number) {
-        this.DB.tbl = this.getTableName();
         const pagination = await this.DB.paginate(page, perPage);
 
         // Ubah result menjadi instance model

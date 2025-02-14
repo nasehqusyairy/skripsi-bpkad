@@ -1,4 +1,5 @@
-import { IUser, User } from '@/app/models/User';
+import { Role } from '@/app/models/Role';
+import { User } from '@/app/models/User';
 import { ControllerAction } from '@/utils/References';
 import bcrypt from 'bcryptjs';
 
@@ -10,10 +11,11 @@ export class AuthController {
 
     static login: ControllerAction = async (req, res) => {
         const { email, password } = req.body;
-        const user = await User.where({ email }).first();
+        const user = await User.where({ email }).with('roles').first();
 
         if (user && bcrypt.compareSync(password, user.password)) {
             req.session.userId = user.id;
+            req.session.roles = (user.roles as unknown as Role[]).map(role => role.name);
             return res.redirect("/dashboard");
         }
 
@@ -40,7 +42,10 @@ export class AuthController {
             password: bcrypt.hashSync(password)
         })
 
+        await user.load('roles')
+
         req.session.userId = user.id;
+        req.session.roles = (user.roles as unknown as Role[]).map(role => role.name);
 
         return res.redirect("/dashboard");
     }

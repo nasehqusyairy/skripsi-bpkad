@@ -1,0 +1,66 @@
+<%
+  layout('layouts/admin')
+  const  roles  = pagination.results
+%>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <h1 class="mt-4">Roles</h1>
+      <div class="card">
+        <div class="card-body">
+          <div class="mb-3">
+            <a href="/roles/create" class="btn btn-primary">New</a>
+          </div>
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% const startIndex = (pagination.currentPage - 1) * pagination.perPage; %>
+              <% roles.forEach((post, i) => { %>
+              <tr>
+                <td><%= startIndex + i + 1 %></td>
+                <td><%= post.name %></td>
+                <td>
+                  <a href="/roles/edit/<%= post.id %>" class="btn btn-warning">Edit</a>
+                  <a href="/roles/delete/<%= post.id %>" class="btn btn-danger" onclick="return confirm('The selected item will be deleted permanently. Are you sure?')">Delete</a>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+
+          </table>
+
+          <% if (pagination.total > pagination.perPage) { %>
+          <nav>
+            <ul class="pagination justify-content-end">
+              <!-- Tombol Previous -->
+              <li class="page-item <%= pagination.previousPage ? '' : 'disabled' %>">
+                <a class="page-link" href="?page=<%= pagination.previousPage %>">Previous</a>
+              </li>
+
+              <!-- Nomor Halaman -->
+              <% for (let i = 1; i <= pagination.lastPage; i++) { %>
+              <li class="page-item <%= pagination.currentPage === i ? 'active' : '' %>">
+                <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+              </li>
+              <% } %>
+
+              <!-- Tombol Next -->
+              <li class="page-item <%= pagination.hasMore ? '' : 'disabled' %>">
+                <a class="page-link" href="?page=<%= pagination.nextPage %>">Next</a>
+              </li>
+            </ul>
+          </nav>
+          <% } %>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

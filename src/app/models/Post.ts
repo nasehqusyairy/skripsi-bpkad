@@ -14,7 +14,9 @@ export class Post extends Model<IPost> implements IPost {
     constructor(attributes: Partial<IPost> = {}) {
         super(attributes);
     }
-    id: number;
+
+    // implementasi interface
+        id: number;
     user_id: number;
     title?: string;
     content?: string;

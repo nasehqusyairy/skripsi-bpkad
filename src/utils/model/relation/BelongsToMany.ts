@@ -1,6 +1,6 @@
 import { MYSQL as DB } from "@/utils/database/DB";
 import { Model } from "../Model";
-import { RowDataPacket } from "mysql2";
+import { ResultSetHeader, RowDataPacket } from "mysql2";
 
 
 export class BelongsToMany<I, R> {
@@ -19,48 +19,48 @@ export class BelongsToMany<I, R> {
         this.relatedKey = relatedKey;
     }
 
-    async attach(relatedIds: any[], additionalAttributes: object = {}) {
+    async attach(relatedIds: any, additionalAttributes: object = {}): Promise<number> {
         if (!Array.isArray(relatedIds)) {
             relatedIds = [relatedIds]; // Jika hanya satu ID, ubah ke array
         }
 
-        const records = relatedIds.map(id => {
-            return {
-                [this.foreignKey]: this.parent[this.parent.getPrimaryKey()], // ID dari model utama
-                [this.relatedKey]: id, // ID dari model terkait
-                ...additionalAttributes // Atribut tambahan untuk tabel pivot
-            };
-        });
+        if (relatedIds.length === 0) {
+            return 0; // Tidak ada data untuk ditambahkan
+        }
 
-        const values = records.map(record => Object.values(record)).flat();
-        const placeholders = values.map(() => "?").join(", ");
-        // console.log({ values, placeholders });
+        const records = relatedIds.map((id: any) => ({
+            [this.foreignKey]: this.parent[this.parent.getPrimaryKey()], // ID dari model utama
+            [this.relatedKey]: id, // ID dari model terkait
+            ...additionalAttributes // Atribut tambahan untuk tabel pivot
+        }));
 
-        const query = `INSERT INTO ${this.pivotTable} (${Object.keys(records[0]).join(", ")}) VALUES (${placeholders})`;
+        const columns = Object.keys(records[0]); // Ambil kolom dari record pertama
+        const placeholders = records.map(() => `(${columns.map(() => "?").join(", ")})`).join(", ");
+        const values = records.flatMap(record => Object.values(record)); // Menyusun array nilai
+
+        const query = `INSERT INTO ${this.pivotTable} (${columns.join(", ")}) VALUES ${placeholders}`;
 
         await DB.execute(query, values);
         return records.length; // Mengembalikan jumlah record yang ditambahkan
     }
 
-    async detach(relatedIds = []) {
+    async detach(relatedIds: any) {
+        if (!relatedIds || (Array.isArray(relatedIds) && relatedIds.length === 0)) {
+            throw new Error("Parameter relatedIds harus diisi dan tidak boleh berupa array kosong.");
+        }
 
         if (!Array.isArray(relatedIds)) {
             relatedIds = [relatedIds]; // Jika hanya satu ID, ubah ke array
         }
 
-        let query = `DELETE FROM ${this.pivotTable} WHERE ${this.foreignKey} = ?`;
-        const params = [this.parent[this.parent.getPrimaryKey()]]; // ID dari model utama
+        // Hapus relasi berdasarkan daftar `relatedIds`
+        const placeholders = relatedIds.map(() => "?").join(", ");
+        const query = `DELETE FROM ${this.pivotTable} WHERE ${this.foreignKey} = ? AND ${this.relatedKey} IN (${placeholders})`;
+        const params = [this.parent[this.parent.getPrimaryKey()], ...relatedIds];
 
-        if (relatedIds.length > 0) {
-            const placeholders = relatedIds.map(() => "?").join(", ");
-            query += ` AND ${this.relatedKey} IN (${placeholders})`;
-            params.push(...relatedIds);
-        }
-
-        const { affectedRows } = (await DB.execute(query, params))[0] as RowDataPacket;
-        return affectedRows; // Mengembalikan jumlah record yang dihapus
+        const [result] = await DB.execute<ResultSetHeader>(query, params);
+        return result?.affectedRows ?? 0; // Pastikan `affectedRows` ada
     }
-
 
     async fetch(ids: any[]): Promise<GroupedData> {
         // Ambil data dari tabel pivot hanya sekali

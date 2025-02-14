@@ -14,13 +14,13 @@ export class User extends Model<IUser> implements IUser {
     constructor(attributes: Partial<IUser> = {}) {
         super(attributes);
     }
+
+    // implementasi interface
     id: number;
     email: string;
     password: string;
     created_at: string;
     updated_at: string;
-
-    protected hidden = ['password'];
 
     // Tambahkan relasi manual di sini jika diperlukan
     posts() {

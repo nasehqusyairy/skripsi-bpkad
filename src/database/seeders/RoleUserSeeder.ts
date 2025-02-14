@@ -6,11 +6,10 @@ export class RoleUserSeeder {
         const records = [
     {
         "id": 1,
-        "nama_relasi": "relasi1",
         "user_id": 1,
         "role_id": 1,
         "created_at": "2025-02-07T17:08:55.000Z",
-        "updated_at": "2025-02-08T00:45:38.000Z"
+        "updated_at": "2025-02-12T07:31:06.000Z"
     }
 ];
         let keys = Object.keys(records[0]);

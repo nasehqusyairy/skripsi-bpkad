@@ -35,8 +35,8 @@ app.use((req, res, next) => {
 
     const old = req.flash("old")[0] || {};
 
-    res.locals.old = (key: string) => {
-        return old[key] || '';
+    res.locals.old = (key: string, defaultValue: string = '') => {
+        return old[key] || defaultValue;
     };
     next();
 });

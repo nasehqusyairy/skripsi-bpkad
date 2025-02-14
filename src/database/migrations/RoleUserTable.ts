@@ -5,7 +5,6 @@ export default class RoleUserTable {
     static async up() {
         await Schema.create('role_user', (table) => {
             table.id();
-            table.string('nama_relasi').nullable();
             table.bigint('user_id').nullable();
             table.bigint('role_id').nullable();
             table.timestamp('created_at').default('CURRENT_TIMESTAMP',true);

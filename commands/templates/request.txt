@@ -1,0 +1,21 @@
+// NOTE: BACA DOKUMENTASI zod di https://zod.dev/
+
+import { Validator } from "@/utils/Validator";
+import { z } from "zod";
+
+class {{name}}Validator extends Validator {
+
+    // Definisi aturan validasi
+    rules() {
+        return z.object({
+            // pengecekan input
+
+        }).superRefine(async (data, ctx) => {
+            // pengecekan database
+
+        });
+    }
+
+}
+
+export const {{name}}Request = new {{name}}Validator();

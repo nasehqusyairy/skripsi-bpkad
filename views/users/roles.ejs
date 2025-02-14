@@ -1,0 +1,57 @@
+<%
+  layout('layouts/admin')
+%>
+
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <h1 class="mt-4">Assign Role</h1>
+      <div class="card mb-3">
+        <div class="card-body">
+          <form action="/users/roles/assign/<%= u.id %>" method="post">
+            <div class="mb-3">
+              <!-- <label class="form-label" for="role">Unassigned Roles</label> -->
+              <select name="role_id" id="role" class="form-select">
+                <option value="" disabled selected>Select unassigned role...</option>
+                <% unassignedRoles.forEach(role => { %>
+                <option value="<%= role.id %>"><%= role.name %></option>
+                <% }) %>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Assign</button>
+            <a href="/users" class="btn btn-secondary">Back</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <h5>Assigned Roles</h5>
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% userRoles.forEach((role, i) => { %>
+              <tr>
+                <td><%= i + 1 %></td>
+                <td><%= role.name %></td>
+                <td>
+                  <a href="/users/roles/remove/<%= u.id %>/?role_id=<%= role.id %>" class="btn btn-danger">Remove</a>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

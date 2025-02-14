@@ -29,6 +29,10 @@ export const apiAuth: Middleware = async (req, res, next) => {
 export const webAuth: Middleware = (req, res, next) => {
 
     if (req.session.userId) {
+        res.locals.user = {
+            id: req.session.userId,
+            roles: req.session.roles
+        }
         next();
     } else {
         res.redirect('/auth');
@@ -37,6 +41,14 @@ export const webAuth: Middleware = (req, res, next) => {
 
 export const guest: Middleware = (req, res, next) => {
     if (!req.session.userId) {
+        next();
+    } else {
+        res.redirect('/dashboard');
+    }
+}
+
+export const adminOnly: Middleware = (req, res, next) => {
+    if (req.session.roles.includes('admin')) {
         next();
     } else {
         res.redirect('/dashboard');

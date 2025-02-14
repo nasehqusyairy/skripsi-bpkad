@@ -4,7 +4,8 @@ const path = require('path');
 // Ambil nama controller dari argument CLI
 const args = process.argv.slice(2);
 if (args.length === 0) {
-    console.error('❌  Error: Harap berikan nama controller. Contoh: npm run make:controller api/Post');
+    // Tampilkan pesan error jika tidak ada argument
+    console.error('\x1b[31m%s\x1b[0m', 'Error: Please provide controller path!');
     process.exit(1);
 }
 
@@ -30,10 +31,13 @@ controllerTemplate = controllerTemplate.replace(/{{controllerName}}/g, controlle
 
 // Cek apakah file sudah ada
 if (fs.existsSync(filePath)) {
-    console.error(`❌  Error: File ${filePath} sudah ada!`);
+    // Tampilkan pesan error jika file sudah ada berwarna merah
+    console.error('\x1b[31m%s\x1b[0m', 'Error: File already exist!');
     process.exit(1);
 }
 
 // Tulis file controller
 fs.writeFileSync(filePath, controllerTemplate.trim());
-console.log(`✅  Controller ${controllerName}Controller.ts berhasil dibuat di ${folderPath}`);
+// console.log(`Created file:`);
+// Tampilkan lokasi file yang dibuat berwarna kuning
+console.log('Created file: ', `\x1b[32m${filePath}\x1b[0m`);

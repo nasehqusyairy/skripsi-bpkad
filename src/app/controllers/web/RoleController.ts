@@ -16,22 +16,27 @@ export class RoleController {
     }
 
     static create: ControllerAction = (req, res) => {
-        // TODO: Implement create logic
+        res.render("roles/create");
     }
 
     static store: ControllerAction = async (req, res) => {
-        // TODO: Implement store logic
+
+        await Role.create(req.body);
+
+        res.redirect("/roles");
     }
 
     static edit: ControllerAction = async (req, res) => {
-        // TODO: Implement edit logic
+        res.render("roles/edit", { role: await Role.find(req.params.id) });
     }
 
     static update: ControllerAction = async (req, res) => {
-        // TODO: Implement update logic
+        await Role.where({ id: parseInt(req.params.id) }).update({ name: req.body.name });
+        res.redirect("/roles");
     }
 
     static delete: ControllerAction = async (req, res) => {
-        // TODO: Implement delete logic
+        await Role.where({ id: parseInt(req.params.id) }).delete();
+        res.redirect("/roles");
     }
 }
