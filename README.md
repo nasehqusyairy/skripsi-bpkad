@@ -42,17 +42,12 @@ Sebelum menggunakan EloTS, pastikan Anda memiliki:
    copy env.example .env
    npm run key:generate
    ```
-4. Jalankan migration database:
+4. Jalankan migrasi dan seeder:
    ```sh
-   npm run migrate
+   npm run migrate:fresh-seed
    ```
-5. Jalankan seeder untuk memasukkan data awal:
+5. Jalankan server:
    ```sh
-   npm run seed
-   ```
-6. Build dan jalankan server:
-   ```sh
-   npm run build
    npm start
    ```
    atau kamu bisa menjalankan perintah `watch` untuk memudahkan development
