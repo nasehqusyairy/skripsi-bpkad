@@ -292,7 +292,7 @@ router.group('/', router => {
     router.get('/dashboard', DashboardController.index);
     router.resource('posts', PostController);
     
-    router.group('/', (router) => {
+    router.group('/', router => {
         router.group('/users', router => {
             router.get('/', UserController.index);
             router.group('/roles', router => {
