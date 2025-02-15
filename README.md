@@ -313,6 +313,8 @@ export const webRoutes = router.router;
 
 Dengan sistem routing ini, EloTS memungkinkan pengelolaan route yang lebih terstruktur dan fleksibel menggunakan middleware, grup route, serta validasi request.
 
+Gunakan perintah `npm run route:list` untuk melihat daftar route yang dihasilkan
+
 # Scaffolding
 
 ## Pendahuluan
