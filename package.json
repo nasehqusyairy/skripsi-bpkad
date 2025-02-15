@@ -4,7 +4,7 @@
   "description": "",
   "main": "./build/index.js",
   "scripts": {
-    "start": "npm run build && node --env-file=.env ./build/index",
+    "start": "node --env-file=.env ./build/index",
     "watch": "concurrently \"tsc -w\" \"nodemon --env-file=.env ./build/index\"",
     "build": "node ./commands/Build.js",
     "scaffold": "node --env-file=.env ./commands/Scaffolder.js",
