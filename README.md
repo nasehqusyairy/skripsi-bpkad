@@ -54,6 +54,9 @@ Sebelum menggunakan EloTS, pastikan Anda memiliki:
    npm start
    ```
    atau kamu bisa menjalankan perintah `watch` untuk memudahkan development
+    ```sh
+   npm run watch
+   ```
 
 ## Struktur Folder
 
