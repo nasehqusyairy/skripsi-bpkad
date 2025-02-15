@@ -49,8 +49,9 @@ Sebelum menggunakan EloTS, pastikan Anda memiliki:
    ```sh
    npm run seed
    ```
-6. Jalankan server:
+6. Build dan jalankan server:
    ```sh
+   npm run build
    npm start
    ```
    atau kamu bisa menjalankan perintah `watch` untuk memudahkan development
