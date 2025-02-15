@@ -9,7 +9,7 @@ EloTS adalah framework berbasis **[Express](https://expressjs.com/), [EJS](https
 - **Arsitektur MVC** (Model, View, Controller)
 - **Routing terpisah** untuk API dan web
 - **Middleware untuk proteksi request**
-- **Query Builder mirip Eloquent** (hanya mendukung MariaDB)
+- **Query Builder mirip Eloquent** (hanya mendukung MariaDB untuk saat ini)
 - **Migration & Seeder** untuk pengelolaan database
 - **Relasi Database** seperti `HasOne`, `HasMany`, `BelongsTo`, dan `BelongsToMany`
 - **CLI Tools** untuk scaffolding, migration, dan seeding
