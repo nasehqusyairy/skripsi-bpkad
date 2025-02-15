@@ -2,7 +2,7 @@
 
 ## Pendahuluan
 
-EloTS adalah framework berbasis **Express, EJS, dan TypeScript** yang terinspirasi dari Laravel dan ASP.NET. Framework ini memiliki fitur **query builder mirip Eloquent** dengan dukungan **MariaDB**. Struktur proyeknya mengikuti pola **MVC** dan memiliki fitur tambahan seperti middleware, request validation, migration, seeder, dan scaffolding.
+EloTS adalah framework berbasis **Express, EJS, dan TypeScript** yang terinspirasi dari [Laravel](https://laravel.com) dan [ASP.NET](https://dotnet.microsoft.com/apps/aspnet). Framework ini memiliki fitur **query builder mirip Eloquent** dengan dukungan **MariaDB**. Struktur proyeknya mengikuti pola **MVC** dan memiliki fitur tambahan seperti middleware, request validation, migration, seeder, dan scaffolding. Selain itu, framework ini juga memanfaatkan tipe data statis dan OOP pada [TypeScript](https://www.typescriptlang.org) untuk membuat kode terjaga dari kesalahan
 
 ## Fitur Utama
 
@@ -14,7 +14,7 @@ EloTS adalah framework berbasis **Express, EJS, dan TypeScript** yang terinspira
 - **Relasi Database** seperti `HasOne`, `HasMany`, `BelongsTo`, dan `BelongsToMany`
 - **CLI Tools** untuk scaffolding, migration, dan seeding
 - **Template Engine EJS** untuk rendering halaman web
-- **Dukungan Validasi Request** seperti Laravel
+- **Dukungan Validasi Request** seperti [Laravel](https://laravel.com)
 
 ## Instalasi
 
@@ -22,9 +22,9 @@ EloTS adalah framework berbasis **Express, EJS, dan TypeScript** yang terinspira
 
 Sebelum menggunakan EloTS, pastikan Anda memiliki:
 
-- **Node.js** (versi terbaru disarankan)
+- **[Node.js](https://nodejs.org)** (versi terbaru disarankan)
 - **MariaDB**
-- **TypeScript**
+- **[TypeScript](https://www.typescriptlang.org)**
 
 ### Langkah Instalasi
 
@@ -216,7 +216,7 @@ export class RoleController {
 
 ## Routing
 
-EloTS menggunakan sistem routing mirip dengan Laravel.
+EloTS menggunakan sistem routing mirip dengan [Laravel](https://laravel.com).
 
 ### Definisi Router
 
@@ -323,7 +323,7 @@ Fitur baru dalam framework EloTS dirancang untuk mempermudah pembuatan model, mi
 - `npm run scaffold`: Membuat file model dan migrasi dari database yang ada.
 - `npm run scaffold:seeder`: Membuat file seeder berdasarkan data yang sudah ada di database.
 
-Namun, fitur ini hanya akan bekerja optimal jika struktur tabel mengikuti aturan dasar dari Laravel, seperti:
+Namun, fitur ini hanya akan bekerja optimal jika struktur tabel mengikuti aturan dasar dari [Laravel](https://laravel.com), seperti:
 - Nama tabel dalam bentuk plural (jamak dalam bahasa inggris) dan satu kata.
 - Menggunakan kolom `id` sebagai primary key dengan auto increment.
 - Tidak mengandung relasi many-to-many secara langsung.
