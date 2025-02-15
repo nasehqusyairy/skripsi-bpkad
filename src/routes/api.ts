@@ -7,24 +7,22 @@ import express, { Response as ExpressResponse, Request as ExpressRequest } from 
 import { PostController } from "@/app/controllers/api/PostController";
 
 
-const router = new Router() as Router & express.Router;
+const router = new Router();
 
 router.get('/', (req: ExpressRequest, res: ExpressResponse) => {
-    res.json(Response.success('Selamat datang di aplikasi mitra'));
+    res.json(Response.success('Welcome to My App API'));
 });
 
 // Contoh endpoint yang memerlukan autentikasi
 router.get('/profile', apiAuth, ProfileController.index);
 
 // // Grouping rute auth
-router.group('/auth', (authRouter: Router & express.Router) => {
+router.group('/auth', router => {
     // Endpoint untuk login
-    authRouter.post('/', AuthController.login);
-    authRouter.get('/logout', apiAuth, AuthController.logout);
+    router.post('/', AuthController.login);
+    router.get('/logout', apiAuth, AuthController.logout);
 });
 
-router.use(apiAuth);
-
-router.apiResource('posts', PostController);
+router.apiResource('posts', PostController, [apiAuth]);
 
 export const apiRoutes = router.router;

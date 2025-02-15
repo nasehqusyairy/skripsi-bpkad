@@ -15,7 +15,8 @@
 
         <% } %>
 
-        <form action="/auth/login" method="POST">
+        <form action="/auth/login/?next=<%=url().query.next%>" method="POST">
+          <%- csrfField() %>
 
           <div class="mb-3">
             <label for="email" class="form-label">Email</label>

@@ -15,19 +15,23 @@
     "seed": "npm run build && node --env-file=.env ./build/database/seeders/DatabaseSeeder.js",
     "migrate:fresh-seed": "npm run migrate:fresh && node --env-file=.env ./build/database/seeders/DatabaseSeeder.js",
     "make:controller": "node ./commands/MakeController.js",
-    "make:request": "node ./commands/MakeRequest.js"
+    "make:request": "node ./commands/MakeRequest.js",
+    "route:list": "node ./commands/RouteList.js"
   },
   "keywords": [],
   "author": "Mohammad Nasyikh Al-Qusyairy",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "csrf-csrf": "^3.1.0",
     "ejs": "^3.1.10",
     "ejs-mate": "^4.0.0",
     "eloquent-query-builder": "^1.0.4",
     "express": "^4.21.2",
     "express-flash": "^0.0.2",
+    "express-list-endpoints": "^7.1.1",
     "express-session": "^1.18.1",
     "jose": "^5.9.6",
     "module-alias": "^2.2.3",
@@ -37,6 +41,7 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/express-flash": "^0.0.5",

@@ -31,7 +31,7 @@ export class AuthController {
             const secret = new TextEncoder().encode(process.env.SESSION_SECRET);
             const token = await new SignJWT({ userId: user.id })
                 .setProtectedHeader({ alg: 'HS256' })
-                .setExpirationTime('1h')
+                .setExpirationTime(process.env.SESSION_TIMEOUT)
                 .sign(secret);
 
             res.json(Response.success('Login berhasil', { token }));

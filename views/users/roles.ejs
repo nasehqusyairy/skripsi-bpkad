@@ -9,6 +9,8 @@
       <div class="card mb-3">
         <div class="card-body">
           <form action="/users/roles/assign/<%= u.id %>" method="post">
+            <%- csrfField() %>
+
             <div class="mb-3">
               <!-- <label class="form-label" for="role">Unassigned Roles</label> -->
               <select name="role_id" id="role" class="form-select">

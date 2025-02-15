@@ -16,9 +16,8 @@ export class RoleController {
     }
 
     static store: ControllerAction = async (req, res) => {
-
         await Role.create(req.body);
-
+        req.flash("success", "New role has been created!");
         res.redirect("/roles");
     }
 
@@ -28,11 +27,13 @@ export class RoleController {
 
     static update: ControllerAction = async (req, res) => {
         await Role.where({ id: parseInt(req.params.id) }).update({ name: req.body.name });
+        req.flash("success", "Role has been updated!");
         res.redirect("/roles");
     }
 
     static delete: ControllerAction = async (req, res) => {
         await Role.where({ id: parseInt(req.params.id) }).delete();
+        req.flash("success", "Role has been deleted!");
         res.redirect("/roles");
     }
 }

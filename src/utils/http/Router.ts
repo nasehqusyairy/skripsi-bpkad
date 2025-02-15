@@ -18,9 +18,11 @@ export type ResourceController = {
 export class Router {
 
     router: express.Router;
+    middlewares: Middleware[] = [];
 
-    constructor() {
+    constructor(middlewares: Middleware[] = []) {
         this.router = express.Router();
+        this.middlewares = middlewares;
 
         // Gunakan Proxy untuk meneruskan semua metode secara otomatis
         return new Proxy(this, {
@@ -32,14 +34,50 @@ export class Router {
         });
     }
 
-    group(prefix: string, callback: RouterGroupCallback) {
-        const subRouter = new Router();
+    get(path: string, ...handlers: Middleware[]) {
+        this.router.get(path, ...this.middlewares, ...handlers);
+        return this;
+    }
+
+    post(path: string, ...handlers: Middleware[]) {
+        this.router.post(path, ...this.middlewares, ...handlers);
+        return this;
+    }
+
+    put(path: string, ...handlers: Middleware[]) {
+        this.router.put(path, ...this.middlewares, ...handlers);
+        return this;
+    }
+
+    patch(path: string, ...handlers: Middleware[]) {
+        this.router.patch(path, ...this.middlewares, ...handlers);
+        return this;
+    }
+
+    delete(path: string, ...handlers: Middleware[]) {
+        this.router.delete(path, ...this.middlewares, ...handlers);
+        return this;
+    }
+
+    options(path: string, ...handlers: Middleware[]) {
+        this.router.options(path, ...this.middlewares, ...handlers);
+        return this;
+    }
+
+    group(prefix: string, callback: RouterGroupCallback, middlewares: Middleware[] = []) {
+        this.middlewares.push(...middlewares)
+
+        const subRouter = new Router(this.middlewares);
         callback(subRouter);
+
         this.router.use(prefix, subRouter.router);
         return this;
     }
 
     resource(prefix: string, controller: Partial<ResourceController>, middlewares: Middleware[] = []) {
+
+        middlewares = [...this.middlewares, ...middlewares];
+
         const resource = new WebResource(this.router, prefix, controller, middlewares);
         const routes = resource.getRoutes();
 
@@ -53,6 +91,9 @@ export class Router {
     }
 
     apiResource(prefix: string, controller: Partial<ResourceController>, middlewares: Middleware[] = []) {
+
+        middlewares = [...this.middlewares, ...middlewares];
+
         const resource = new ApiResource(this.router, prefix, controller, middlewares);
         const routes = resource.getRoutes();
 

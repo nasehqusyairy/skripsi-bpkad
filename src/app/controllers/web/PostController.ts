@@ -28,6 +28,8 @@ export class PostController {
             user_id: req.session.userId
         });
 
+        req.flash("success", "New post has been created!");
+
         res.redirect("/posts");
     }
 
@@ -44,11 +46,14 @@ export class PostController {
 
         await post.save();
 
+        req.flash("success", "Post has been updated!");
+
         res.redirect("/posts");
     }
 
     static delete: ControllerAction = async (req, res) => {
         await Post.delete(req.params.id);
+        req.flash("success", "Post has been deleted!");
         res.redirect("/posts");
     }
 }

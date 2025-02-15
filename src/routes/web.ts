@@ -9,44 +9,46 @@ import { RegisterRequest } from "@/app/requests/web/auth/RegisterRequest";
 import { AssignRoleRequest } from "@/app/requests/web/users/AssignRoleRequest";
 import { RoleRequest } from "@/app/requests/web/roles/RoleRequest";
 import { Router } from "@/utils/http/Router";
-import express from "express";
 
-const router = new Router() as Router & express.Router;
+const router = new Router();
 
 router.get('/', HomeController.index);
 
-router.group('/auth', (authRouter: Router & express.Router) => {
+router.group('/auth', router => {
 
-    authRouter.get('/', guest, AuthController.index);
-    authRouter.post('/login', AuthController.login);
+    router.get('/', guest, AuthController.index);
+    router.post('/login', AuthController.login);
 
-    authRouter.get('/logout', AuthController.logout);
+    router.get('/logout', AuthController.logout);
 
-    authRouter.get('/register', guest, AuthController.registerView);
-    authRouter.post('/register', RegisterRequest, AuthController.register);
+    router.get('/register', guest, AuthController.registerView);
+    router.post('/register', RegisterRequest, AuthController.register);
 });
 
 // Authenticated User Only
-router.use(webAuth);
+router.group('/', router => {
 
-router.get('/dashboard', DashboardController.index);
+    router.get('/dashboard', DashboardController.index);
 
-router.resource('posts', PostController);
+    router.resource('posts', PostController);
 
-// Admin Only
-router.use(adminOnly);
+    // Admin Only
+    router.group('/', (router) => {
 
-router.group('/users', (userRouter: Router & express.Router) => {
-    userRouter.get('/', UserController.index);
-    userRouter.group('/roles', (roleRouter: Router & express.Router) => {
-        roleRouter.get('/:id', UserController.roles);
-        roleRouter.post('/assign/:id', AssignRoleRequest, UserController.assignRole);
-        roleRouter.get('/remove/:id', UserController.removeRole);
-    });
-});
+        router.group('/users', router => {
+            router.get('/', UserController.index);
+            router.group('/roles', router => {
+                router.get('/:id', UserController.roles);
+                router.post('/assign/:id', AssignRoleRequest, UserController.assignRole);
+                router.get('/remove/:id', UserController.removeRole);
+            });
+        });
 
-router.resource('roles', RoleController)
-    .except('show')
-    .addRequest(['store', 'update'], RoleRequest)
+        router.resource('roles', RoleController)
+            .except('show')
+            .addRequest(['store', 'update'], RoleRequest)
+
+    }, [adminOnly]);
+}, [webAuth]);
 
 export const webRoutes = router.router;
