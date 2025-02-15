@@ -30,8 +30,8 @@ Sebelum menggunakan EloTS, pastikan Anda memiliki:
 
 1. Clone repository EloTS:
    ```sh
-   git clone https://github.com/nasehqusyairy/elo-ts.git
-   cd elo-ts
+   git clone https://github.com/nasehqusyairy/elo-ts.git myapp
+   cd myapp
    ```
 2. Install dependencies:
    ```sh
