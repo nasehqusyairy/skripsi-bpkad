@@ -19,7 +19,8 @@
     "make:model": "node ./commands/MakeFile.js model",
     "make:migration": "node ./commands/MakeFile.js migration",
     "make:seeder": "node ./commands/MakeFile.js seeder",
-    "route:list": "node ./commands/RouteList.js"
+    "route:list": "node ./commands/RouteList.js",
+    "key:generate": "node ./commands/KeyGenerate.js"
   },
   "keywords": [],
   "author": "Mohammad Nasyikh Al-Qusyairy",

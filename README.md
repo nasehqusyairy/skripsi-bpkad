@@ -39,7 +39,8 @@ Sebelum menggunakan EloTS, pastikan Anda memiliki:
    ```
 3. Buat file konfigurasi `.env` berdasarkan `env.example`:
    ```sh
-   cp env.example .env
+   copy env.example .env
+   npm run key:generate
    ```
 4. Jalankan migration database:
    ```sh
