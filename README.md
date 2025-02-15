@@ -9,7 +9,7 @@ EloTS adalah framework berbasis **[Express](https://expressjs.com/), [EJS](https
 - **Arsitektur MVC** (Model, View, Controller)
 - **Routing terpisah** untuk API dan web
 - **Middleware untuk proteksi request**
-- **Query Builder mirip Eloquent** (hanya mendukung MariaDB)
+- **Query Builder mirip Eloquent** (hanya mendukung MariaDB untuk saat ini)
 - **Migration & Seeder** untuk pengelolaan database
 - **Relasi Database** seperti `HasOne`, `HasMany`, `BelongsTo`, dan `BelongsToMany`
 - **CLI Tools** untuk scaffolding, migration, dan seeding
@@ -30,7 +30,7 @@ Sebelum menggunakan EloTS, pastikan Anda memiliki:
 
 1. Clone repository EloTS:
    ```sh
-   https://github.com/nasehqusyairy/elo-ts.git
+   git clone https://github.com/nasehqusyairy/elo-ts.git
    cd elo-ts
    ```
 2. Install dependencies:
@@ -50,8 +50,9 @@ Sebelum menggunakan EloTS, pastikan Anda memiliki:
    ```sh
    npm run seed
    ```
-6. Jalankan server:
+6. Build dan jalankan server:
    ```sh
+   npm run build
    npm start
    ```
    atau kamu bisa menjalankan perintah `watch` untuk memudahkan development
@@ -88,7 +89,7 @@ EloTS memiliki query builder seperti Eloquent, tetapi untuk saat ini hanya mendu
 Untuk membuat model baru, gunakan perintah berikut:
 
 ```sh
-npm run make:model path/NamaClass
+npm run make:model NamaClass
 ```
 
 Perintah ini akan menghasilkan file model di dalam folder `src/app/models` dengan template sebagai berikut:
