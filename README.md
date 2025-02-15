@@ -87,7 +87,7 @@ EloTS memiliki query builder seperti Eloquent, tetapi untuk saat ini hanya mendu
 Untuk membuat model baru, gunakan perintah berikut:
 
 ```sh
-npm run make:model path/NamaClass
+npm run make:model NamaClass
 ```
 
 Perintah ini akan menghasilkan file model di dalam folder `src/app/models` dengan template sebagai berikut:
