@@ -2,7 +2,7 @@
 
 ## Pendahuluan
 
-EloTS adalah framework berbasis **Express, EJS, dan TypeScript** yang terinspirasi dari [Laravel](https://laravel.com) dan [ASP.NET](https://dotnet.microsoft.com/apps/aspnet). Framework ini memiliki fitur **query builder mirip Eloquent** dengan dukungan **MariaDB**. Struktur proyeknya mengikuti pola **MVC** dan memiliki fitur tambahan seperti middleware, request validation, migration, seeder, dan scaffolding. Selain itu, framework ini juga memanfaatkan tipe data statis dan OOP pada [TypeScript](https://www.typescriptlang.org) untuk membuat kode terjaga dari kesalahan
+EloTS adalah framework berbasis **[Express](https://expressjs.com/), [EJS](https://ejs.co/), dan [TypeScript](https://www.typescriptlang.org)** yang terinspirasi dari [Laravel](https://laravel.com) dan [ASP.NET](https://dotnet.microsoft.com/apps/aspnet). Framework ini memiliki fitur **query builder mirip Eloquent** dengan dukungan **MariaDB**. Struktur proyeknya mengikuti pola **MVC** dan memiliki fitur tambahan seperti middleware, request validation, migration, seeder, dan scaffolding. Selain itu, framework ini juga memanfaatkan tipe data statis dan OOP pada [TypeScript](https://www.typescriptlang.org) untuk membuat kode terjaga dari kesalahan
 
 ## Fitur Utama
 
