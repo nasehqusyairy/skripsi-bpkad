@@ -16,6 +16,9 @@
     "migrate:fresh-seed": "npm run migrate:fresh && node --env-file=.env ./build/database/seeders/DatabaseSeeder.js",
     "make:controller": "node ./commands/MakeController.js",
     "make:request": "node ./commands/MakeRequest.js",
+    "make:model": "node ./commands/MakeFile.js model",
+    "make:migration": "node ./commands/MakeFile.js migration",
+    "make:seeder": "node ./commands/MakeFile.js seeder",
     "route:list": "node ./commands/RouteList.js"
   },
   "keywords": [],

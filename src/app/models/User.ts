@@ -24,7 +24,7 @@ export class User extends Model<IUser> implements IUser {
 
     // Tambahkan relasi manual di sini jika diperlukan
     posts() {
-        return this.hasMany(Post, 'user_id');
+        return this.hasMany(Post);
     }
 
     roles() {
