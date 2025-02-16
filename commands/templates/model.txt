@@ -9,7 +9,7 @@ export class {{className}} extends Model<I{{className}}> implements I{{className
     constructor(attributes: Partial<I{{className}}> = {}) {
         super(attributes);
     }
-
+    {{protectedTableName}}
     // implementasi interface
     {{fields}}
 

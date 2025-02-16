@@ -1,9 +1,14 @@
 const fs = require("fs");
 const path = require("path");
-const { DB } = require("./DB");
+const { ScaffoldingDB } = require("./DB");
 const { singularize } = require("sequelize/lib/utils");
 
+const DB = ScaffoldingDB;
+
+
 //#region Constants
+const sourceSeeds = process.env.SCAFFOLDING_SOURCE_SEEDS || process.env.SCAFFOLDING_SOURCE_TABLES;
+const selectedTables = sourceSeeds?.split(",").map(e => e.trim()) || [];
 const MAX_RECORDS = process.env.SCAFFOLDING_MAX_RECORD || 100; // Default max record jika tidak diset
 const OUTPUT_DIR = path.join("src", "database", "seeders");
 
@@ -28,6 +33,12 @@ const MODELS_DIR = path.join("src", "app", "models");
 
         for (const tableObj of tables) {
             const tableName = Object.values(tableObj)[0];
+
+            // Jika ada filter, hanya scaffold tabel yang sesuai
+            if (selectedTables.length > 0 && !selectedTables.includes(tableName)) {
+                continue;
+            }
+
             const className = `${toPascalCaseSingular(tableName)}Seeder`;
             const modelName = toPascalCaseSingular(tableName);
             const modelPath = path.join(MODELS_DIR, `${modelName}.ts`);
@@ -55,6 +66,10 @@ const MODELS_DIR = path.join("src", "app", "models");
 
         // Buat DatabaseSeeder.ts setelah semua seeder selesai dibuat
         if (seederClasses.length > 0) {
+
+            // ambil nama kelas seeder dari folder seeders
+            const seeders = fs.readdirSync(OUTPUT_DIR);
+            const seederClasses = seeders.map(file => file.replace('.ts', '')).filter(file => file !== 'DatabaseSeeder');
             generateDatabaseSeeder(seederClasses);
             console.timeEnd('Done');
         }

@@ -1,15 +1,33 @@
 import "module-alias/register";
 import { MYSQL as DB } from "@/utils/database/DB";
+import { BMDetailSubkegiatanSeeder } from "./BMDetailSubkegiatanSeeder";
+import { BMKegiatanSeeder } from "./BMKegiatanSeeder";
+import { BMKomponenRealisasiSeeder } from "./BMKomponenRealisasiSeeder";
+import { BMKomponenSeeder } from "./BMKomponenSeeder";
+import { BMOrgSeeder } from "./BMOrgSeeder";
+import { BMProgramSeeder } from "./BMProgramSeeder";
+import { BMSshbdSeeder } from "./BMSshbdSeeder";
+import { BMSubkegiatanSeeder } from "./BMSubkegiatanSeeder";
+import { MTahapanSeeder } from "./MTahapanSeeder";
 import { PostSeeder } from "./PostSeeder";
-import { RoleUserSeeder } from "./RoleUserSeeder";
 import { RoleSeeder } from "./RoleSeeder";
+import { RoleUserSeeder } from "./RoleUserSeeder";
 import { UserSeeder } from "./UserSeeder";
 
 (async () => {
     const seeders = [
+        BMDetailSubkegiatanSeeder,
+        BMKegiatanSeeder,
+        BMKomponenRealisasiSeeder,
+        BMKomponenSeeder,
+        BMOrgSeeder,
+        BMProgramSeeder,
+        BMSshbdSeeder,
+        BMSubkegiatanSeeder,
+        MTahapanSeeder,
         PostSeeder,
-        RoleUserSeeder,
         RoleSeeder,
+        RoleUserSeeder,
         UserSeeder
     ];
 
