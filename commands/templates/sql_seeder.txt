@@ -1,5 +1,7 @@
 import 'module-alias/register';
 import { MYSQL as DB } from "@/utils/database/DB";
+import fs from 'fs';
+import path from 'path';
 
 export class {{className}} {
     static async run() {

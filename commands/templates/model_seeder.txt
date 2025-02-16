@@ -1,5 +1,7 @@
 import 'module-alias/register';
 import { {{modelName}} } from "@/app/models/{{modelName}}";
+import fs from 'fs';
+import path from 'path';
 
 export class {{className}} {
     static async run() {

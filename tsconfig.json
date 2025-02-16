@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "incremental": true,
     "baseUrl": "./",
     "paths": {
       "@/*": [
@@ -16,9 +17,5 @@
   },
   "include": [
     "src/**/*",
-    "commands/Scaffolder.js",
-    "commands/SeedScaffolder.js",
-    "commands/Migrate.js",
-    "commands/Rollback.js",
   ]
 }
