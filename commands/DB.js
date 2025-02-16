@@ -12,4 +12,11 @@ const DB = createPool({
   database,
 });
 
-module.exports = { DB };
+const ScaffoldingDB = createPool({
+  host: process.env.SCAFFOLDING_SOURCE_HOST || host,
+  user: process.env.SCAFFOLDING_SOURCE_USER || user,
+  password: process.env.SCAFFOLDING_SOURCE_PASSWORD || password,
+  database: process.env.SCAFFOLDING_SOURCE_NAME || database,
+});
+
+module.exports = { DB, ScaffoldingDB };

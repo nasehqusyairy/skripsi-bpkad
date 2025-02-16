@@ -1,7 +1,13 @@
 const fs = require("fs");
 const path = require("path");
-const { DB } = require("./DB");
+const { ScaffoldingDB } = require("./DB");
 const { singularize, pluralize } = require("sequelize/lib/utils");
+
+const DB = ScaffoldingDB;
+
+// Ambil daftar tabel yang diinginkan dari argumen CLI
+const selectedTables = process.env.SCAFFOLDING_SOURCE_TABLES?.split(",").map(e => e.trim()) || [];
+
 
 //#region Generate
 async function generate() {
@@ -17,6 +23,11 @@ async function generate() {
     for (const table of tables) {
         const tableName = table[`Tables_in_${databaseName}`];
 
+        // Jika ada filter, hanya scaffold tabel yang sesuai
+        if (selectedTables.length > 0 && !selectedTables.includes(tableName)) {
+            continue;
+        }
+
         // Ambil informasi kolom
         const [columns] = await DB.execute(`DESCRIBE ${tableName}`);
 
@@ -27,8 +38,8 @@ async function generate() {
         await generateMigration(tableName, columns);
 
         // Buat file model (hanya untuk tabel yang bukan pivot)
-        if (!tableName.includes("_")) {
-            await generateModel(tableName, columns, allTables); // Kirim allTables dengan struktur yang benar
+        if (!tableName.includes("_") || selectedTables.length > 0) {
+            await generateModel(tableName, columns, allTables);
         }
     }
 
@@ -65,7 +76,6 @@ async function generateMigration(tableName, columns) {
     let template = fs.readFileSync(templatePath, "utf-8");
 
     // Generate nama file dan class
-    const timestamp = Math.floor(Date.now() / 1000);
     const className = `${toPascalCase(tableName)}Table`;
     const fileName = `${className}.ts`;
 
@@ -134,27 +144,32 @@ async function generateModel(tableName, columns, allTables) {
     const templatePath = path.join("commands", "templates", "model.txt");
     let template = fs.readFileSync(templatePath, "utf-8");
 
-    const className = toPascalCase(toSingular(tableName));
+    let className;
+    let protectedTableName = "";
 
-    // Mendeteksi foreign key berdasarkan pola penamaan & mendapatkan daftar import
+    if (isLaravelFriendlyName(tableName)) {
+        className = toPascalCase(singularize(tableName)); // Singular PascalCase
+    } else {
+        className = toPascalCase(tableName); // PascalCase
+        protectedTableName = `\n    protected tablename = "${tableName}";\n`;
+    }
+
     const { relations, relationImports } = detectRelations(tableName, columns, allTables);
 
-    // Generate daftar field untuk interface
     let fieldsDefinition = columns
         .map(col => `    ${col.Field}${col.Null === "YES" ? "?" : ""}: ${mapTsType(col.Type)};`)
         .join("\n");
 
-    // Buat string import relasi
     const relationImportsCode = relationImports
         .map(cls => `import { ${cls} } from "./${cls}";`)
         .join("\n");
 
-    // Ganti placeholder dalam template
     template = template
         .replace(/{{className}}/g, className)
         .replace(/{{fields}}/g, fieldsDefinition)
-        .replace(/{{relationImports}}/g, relationImportsCode) // Tambahkan baris import
-        .replace(/{{relations}}/g, relations);
+        .replace(/{{relationImports}}/g, relationImportsCode)
+        .replace(/{{relations}}/g, relations)
+        .replace(/{{protectedTableName}}/g, protectedTableName);
 
     const modelPath = path.join("src", "app", "models", `${className}.ts`);
     fs.writeFileSync(modelPath, template);
@@ -182,9 +197,9 @@ function detectRelations(tableName, columns, allTables) {
     for (const otherTable of allTables) {
         if (otherTable.name !== tableName && !isPivotTable(otherTable.name)) {
             for (const col of otherTable.columns) {
-                if (col.Field === `${toSingular(tableName)}_id`) {
+                if (col.Field === `${singularize(tableName)}_id`) {
                     const relationName = otherTable.name;
-                    const relatedClass = toPascalCase(toSingular(relationName));
+                    const relatedClass = toPascalCase(singularize(relationName));
                     relationImports.add(relatedClass); // Tambahkan ke daftar import
 
                     relations += `\n    ${toCamelCase(relationName)}() {`;
@@ -207,7 +222,8 @@ function mapTsType(columnType) {
     if (columnType.startsWith("int") || columnType.startsWith("bigint")) return "number";
     if (columnType.startsWith("varchar") || columnType.startsWith("text")) return "string";
     if (columnType.startsWith("timestamp") || columnType.startsWith("datetime")) return "string";
-    if (columnType.startsWith("boolean") || columnType.startsWith("tinyint(1)")) return "boolean";
+    // if (columnType.startsWith("boolean") || columnType.startsWith("tinyint(1)")) return "boolean";
+    if (columnType.startsWith("boolean") || columnType.startsWith("tinyint(1)")) return "number";
     return "any"; // Default jika tipe tidak dikenali
 }
 
@@ -222,20 +238,16 @@ function mapColumnType(columnType) {
 //#endregion
 
 //#region Utils
+function isLaravelFriendlyName(tableName) {
+    return tableName === pluralize(tableName).toLowerCase();
+}
+
 function toPascalCase(str) {
     return str.replace(/(^\w|_\w)/g, (match) => match.replace(/_/, "").toUpperCase());
 }
 
-function toSingular(str) {
-    return singularize(str);
-}
-
 function isPivotTable(tableName) {
     return tableName.includes("_"); // Deteksi pivot berdasarkan nama tabel
-}
-
-function toPlural(str) {
-    return pluralize(str);
 }
 
 function toCamelCase(str) {
