@@ -30,11 +30,12 @@ export class Model<I> {
 
     constructor(attributes: Partial<I> = {}) {
         this.assign(attributes);
-        this.DB = Object.assign(Object.create(Object.getPrototypeOf(DB)), DB).table(this.getTableName());
+        this.DB = Object.assign(Object.create(Object.getPrototypeOf(DB)), DB);
     }
 
     // #region Static Helpers
     async first(): Promise<this | null> {
+        this.DB.tbl = this.getTableName();
         // Ambil data pertama dari database
         const data = await this.DB.first();
 
@@ -140,7 +141,9 @@ export class Model<I> {
     // #region Order and Limit
     static groupBy<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, ...columns: (keyof K)[]): T {
         const model = new this();
+        model.DB.whereNot(columns[0], "''");
         model.DB.groupBy(...columns);
+
         return model;
     }
 
@@ -753,7 +756,6 @@ export class Model<I> {
         return totalAffectedRows;
     }
 
-
     // #region Delete
 
     async delete() {
@@ -859,6 +861,8 @@ export class Model<I> {
 
     // #region Get
     async get(): Promise<this[]> {
+        this.DB.tbl = this.getTableName();
+
         // Ambil data utama
         let results = await this.DB.get();
 
@@ -873,6 +877,7 @@ export class Model<I> {
     }
 
     async paginate(page: number, perPage: number) {
+        this.DB.tbl = this.getTableName();
         const pagination = await this.DB.paginate(page, perPage);
 
         // Ubah result menjadi instance model
