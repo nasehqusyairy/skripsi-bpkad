@@ -143,12 +143,20 @@ export class Model<I> {
         const model = new this();
         model.DB.whereNot(columns[0], "''");
         model.DB.groupBy(...columns);
-
         return model;
     }
 
     groupBy<K extends keyof I>(...columns: K[]): this {
+        this.DB.whereNot(columns[0], "''");
         this.DB.groupBy(...columns);
+
+        return this;
+    }
+
+    group(): this {
+        const selectedColumns = this.DB.queryInital.split(',')
+        this.DB.whereNot(selectedColumns[0], "''");
+        this.DB.groupBy(...selectedColumns);
         return this;
     }
 
