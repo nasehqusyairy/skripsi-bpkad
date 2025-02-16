@@ -151,7 +151,7 @@ async function generateModel(tableName, columns, allTables) {
         className = toPascalCase(singularize(tableName)); // Singular PascalCase
     } else {
         className = toPascalCase(tableName); // PascalCase
-        protectedTableName = `\n    protected tablename = "${tableName}";\n`;
+        protectedTableName = `\n    protected tableName = "${tableName}";\n`;
     }
 
     const { relations, relationImports } = detectRelations(tableName, columns, allTables);

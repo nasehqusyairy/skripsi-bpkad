@@ -9,7 +9,7 @@ const DB = ScaffoldingDB;
 //#region Constants
 const sourceSeeds = process.env.SCAFFOLDING_SOURCE_SEEDS || process.env.SCAFFOLDING_SOURCE_TABLES;
 const selectedTables = sourceSeeds?.split(",").map(e => e.trim()) || [];
-const MAX_RECORDS = process.env.SCAFFOLDING_MAX_RECORD || 100; // Default max record jika tidak diset
+const MAX_RECORDS = process.env.SCAFFOLDING_MAX_RECORD; // Default max record jika tidak diset
 const OUTPUT_DIR = path.join("src", "database", "seeders");
 
 // Path template
@@ -43,7 +43,9 @@ const MODELS_DIR = path.join("src", "app", "models");
             const modelName = toPascalCaseSingular(tableName);
             const modelPath = path.join(MODELS_DIR, `${modelName}.ts`);
 
-            const [rows] = await connection.execute(`SELECT * FROM ${tableName} LIMIT ?`, [MAX_RECORDS]);
+            const query = `SELECT * FROM ${tableName}` + (MAX_RECORDS ? ` LIMIT ${MAX_RECORDS}` : '');
+
+            const [rows] = await connection.execute(query);
 
             if (rows.length > 0) {
                 let seederContent;
