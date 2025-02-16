@@ -18,6 +18,14 @@ const SQL_TEMPLATE_PATH = path.join("commands", "templates", "sql_seeder.txt");
 const DATABASE_SEEDER_TEMPLATE_PATH = path.join("commands", "templates", "database_seeder.txt");
 
 const MODELS_DIR = path.join("src", "app", "models");
+
+
+const SEEDS_DIR = path.join("seeds"); // Folder penyimpanan JSON
+
+// Pastikan folder `seeds/` ada
+if (!fs.existsSync(SEEDS_DIR)) {
+    fs.mkdirSync(SEEDS_DIR, { recursive: true });
+}
 //#endregion
 
 //#region Auto run
@@ -31,10 +39,10 @@ const MODELS_DIR = path.join("src", "app", "models");
         const [tables] = await connection.execute("SHOW TABLES");
         const seederClasses = [];
 
+        // Perubahan dalam perulangan generate seeder
         for (const tableObj of tables) {
             const tableName = Object.values(tableObj)[0];
 
-            // Jika ada filter, hanya scaffold tabel yang sesuai
             if (selectedTables.length > 0 && !selectedTables.includes(tableName)) {
                 continue;
             }
@@ -43,26 +51,24 @@ const MODELS_DIR = path.join("src", "app", "models");
             const modelName = toPascalCaseSingular(tableName);
             const modelPath = path.join(MODELS_DIR, `${modelName}.ts`);
 
-            const query = `SELECT * FROM ${tableName}` + (MAX_RECORDS ? ` LIMIT ${MAX_RECORDS}` : '');
-
+            const query = `SELECT * FROM ${tableName}`;
             const [rows] = await connection.execute(query);
 
             if (rows.length > 0) {
-                let seederContent;
+                // Simpan hasil query ke file JSON
+                saveQueryToJson(className, rows);
 
+                let seederContent;
                 if (fs.existsSync(modelPath)) {
-                    // Gunakan metode insert dari model jika tersedia
-                    seederContent = generateModelSeederContent(className, modelName, rows);
+                    seederContent = generateModelSeederContent(className, modelName);
                 } else {
-                    // Gunakan query SQL insert jika model tidak ditemukan
-                    seederContent = generateSQLSeederContent(className, tableName, rows);
+                    seederContent = generateSQLSeederContent(className, tableName);
                 }
 
                 const filePath = path.join(OUTPUT_DIR, `${className}.ts`);
                 fs.writeFileSync(filePath, seederContent, "utf8");
                 console.log('\x1b[33m%s\x1b[0m', `Seeder generated: ${filePath}`);
-
-                seederClasses.push(className); // Simpan nama kelas seeder
+                seederClasses.push(className);
             }
         }
 
@@ -122,22 +128,28 @@ function toPascalCaseSingular(tableName) {
     const singularName = singularize(tableName); // Menggunakan Sequelize untuk mendapatkan bentuk singular
     return singularName.replace(/_([a-z])/g, (_, c) => c.toUpperCase()).replace(/^./, str => str.toUpperCase());
 }
+
+// Menyimpan hasil query ke file JSON
+function saveQueryToJson(className, data) {
+    const filePath = path.join(SEEDS_DIR, `${className}.json`);
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 4), "utf8");
+}
 //#endregion
 
 //#region Seeder Generators
-function generateModelSeederContent(className, modelName, records) {
+function generateModelSeederContent(className, modelName) {
     return applyTemplate(MODEL_TEMPLATE_PATH, {
         className,
         modelName,
-        records: JSON.stringify(records, null, 4),
+        records: `JSON.parse(fs.readFileSync(path.join("seeds", "${className}.json"), "utf8"))`,
     });
 }
 
-function generateSQLSeederContent(className, tableName, records) {
+function generateSQLSeederContent(className, tableName) {
     return applyTemplate(SQL_TEMPLATE_PATH, {
         className,
         tableName,
-        records: JSON.stringify(records, null, 4),
+        records: `JSON.parse(fs.readFileSync(path.join("seeds", "${className}.json"), "utf8"))`,
     });
 }
 //#endregion
