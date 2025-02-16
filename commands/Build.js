@@ -92,7 +92,7 @@ exec('tsc', (error, stdout, stderr) => {
                 const fileSizeInKB = fileSizeInBytes / 1024;
 
                 filesInfo.push({
-                    Name: itemPath.replace(distFolder, '\\build'),
+                    Name: itemPath.replace(distFolder, '\\build').replace(/\\/g, '/'),
                     'Size (KB)': fileSizeInKB,
                 });
             }
