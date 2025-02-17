@@ -262,71 +262,6 @@ export class Model<I> {
         return model
     }
 
-
-    static orWhere<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, operator: QueryOperator, value: any): T
-    static orWhere<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, value: any): T
-    static orWhere<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, args: Partial<K>): T
-
-    static orWhere<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, ...args: [keyof K, QueryOperator, any] | [keyof K, any] | [Partial<K>]): T {
-        const model = new this()
-
-        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
-            const [object] = args;
-            if (typeof object !== "object") {
-                throw new Error("Invalid argument. Argument must be an object if there is only one argument.");
-            }
-
-            for (const key in object) {
-                model.DB.orWhere(key, object[key]);
-            }
-        } else if (args.length === 2) {
-            model.DB.orWhere(args[0], "=", args[1]);
-        }
-        else {
-            model.DB.orWhere(args[0], args[1] as QueryOperator, args[2]);
-        }
-
-        return model
-    }
-
-    static orWhereNot<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, operator: QueryOperator, value: any): T
-    static orWhereNot<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, value: any): T
-    static orWhereNot<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, args: Partial<K>): T
-
-    static orWhereNot<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, ...args: [keyof K, QueryOperator, any] | [keyof K, any] | [Partial<K>]): T {
-        const model = new this();
-
-        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
-            const [object] = args;
-            if (typeof object !== "object") {
-                throw new Error("Invalid argument. Argument must be an object if there is only one argument.");
-            }
-
-            for (const key in object) {
-                model.DB.orWhereNot(key, object[key]);
-            }
-        } else if (args.length === 2) {
-            model.DB.orWhereNot(args[0], "=", args[1]);
-        }
-        else {
-            model.DB.orWhereNot(args[0], args[1] as QueryOperator, args[2]);
-        }
-
-        return model
-    }
-
-    static orWhereNull<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K) {
-        const model = new this();
-        model.DB.orWhereNull(column);
-        return model
-    }
-
-    static orWhereNotNull<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K) {
-        const model = new this();
-        model.DB.orWhereNotNull(column);
-        return model
-    }
-
     static whereNot<T extends Model<K>, K>(this: new () => T, column: keyof K, operator: QueryOperator, value: any): T
     static whereNot<T extends Model<K>, K>(this: new () => T, column: keyof K, value: any): T
     static whereNot<T extends Model<K>, K>(this: new () => T, args: Partial<K>): T
@@ -389,23 +324,6 @@ export class Model<I> {
         return model
     }
 
-    static orWhereBetween<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, values: [any, any]) {
-
-        const [start, end] = values;
-
-        const model = new this();
-        model.DB.orWhere(column, "BETWEEN", start, "AND", end);
-        return model
-    }
-
-    static orWhereNotBetween<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, values: [any, any]) {
-        const [start, end] = values;
-
-        const model = new this();
-        model.DB.orWhere(column, "NOT BETWEEN", start, "AND", end);
-        return model
-    }
-
     static whereIn<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, values: any[]) {
         const model = new this();
         model.DB.whereIn(column, values);
@@ -426,30 +344,63 @@ export class Model<I> {
     }
 
 
-    static whereLike<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, value: any) {
+    static whereLike<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, value: any): T;
+    static whereLike<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, args: Partial<K>): T;
+
+    static whereLike<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, ...args: [keyof K, any] | [Partial<K>]) {
         const model = new this();
-        model.DB.where(column, "LIKE", value);
-        return model
+
+        if (args.length === 1 && typeof args[0] === "object" && args[0] !== null) {
+            for (const key in args[0]) {
+                if (args[0].hasOwnProperty(key)) {
+                    if (!args[0][key]) continue;
+                    model.DB.where(key, "LIKE", args[0][key]);
+                }
+            }
+        } else {
+            if (!args[1]) return model;
+            model.DB.where(args[0], "LIKE", args[1]);
+        }
+
+        return model;
     }
 
-    static whereNotLike<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, value: any) {
+    static whereNotLike<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, value: any): T;
+    static whereNotLike<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, args: Partial<K>): T;
+
+    static whereNotLike<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, ...args: [keyof K, any] | [Partial<K>]) {
         const model = new this();
-        model.DB.where(column, "NOT LIKE", value);
-        return model
+
+        if (args.length === 1 && typeof args[0] === "object" && args[0] !== null) {
+            for (const key in args[0]) {
+                if (args[0].hasOwnProperty(key)) {
+                    if (!args[0][key]) continue;
+                    model.DB.where(key, "NOT LIKE", args[0][key]);
+                }
+            }
+        } else {
+            if (!args[1]) return model
+            model.DB.where(args[0], "NOT LIKE", args[1]);
+        }
+
+        return model;
     }
 
-    static orWhereLike<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, value: any) {
+    static whereColumnsLike<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, columns: (keyof K)[], value: any): T {
         const model = new this();
-        model.DB.orWhere(column, "LIKE", value);
-        return model
-    }
 
-    static orWhereNotLike<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, value: any) {
-        const model = new this();
-        model.DB.orWhere(column, "NOT LIKE", value);
-        return model
-    }
+        if (!value) return model;
 
+        columns.forEach((column, i) => {
+            if (i === 0) {
+                model.DB.where(column, "LIKE", value);
+            } else {
+                model.DB.orWhere(column, "LIKE", value);
+            }
+        });
+
+        return model;
+    }
 
     // #endregion
 
@@ -645,23 +596,100 @@ export class Model<I> {
         return this;
     }
 
-    whereLike<K extends keyof I>(column: K, value: any) {
-        this.DB.where(column, "LIKE", value);
+    whereLike<K extends keyof I>(column: K, value: any): this;
+    whereLike(args: Partial<I>): this;
+
+    whereLike(...args: [keyof I, any] | [Partial<I>]) {
+        if (args.length === 1 && typeof args[0] === "object" && args[0] !== null) {
+            // Jika argumen adalah objek key-value
+            const condition = args[0] as Partial<I>;
+            for (const key in condition) {
+                if (condition.hasOwnProperty(key)) {
+                    if (!condition[key]) continue;
+                    this.DB.where(key, "LIKE", condition[key]);
+                }
+            }
+        } else {
+            if (!args[1]) return this;
+            // Jika hanya key dan value, gunakan "LIKE"
+            this.DB.where(args[0], "LIKE", args[1]);
+        }
+
         return this;
     }
 
-    whereNotLike<K extends keyof I>(column: K, value: any) {
-        this.DB.where(column, "NOT LIKE", value);
+    orWhereLike<K extends keyof I>(column: K, value: any): this;
+    orWhereLike(args: Partial<I>): this;
+
+    orWhereLike(...args: [keyof I, any] | [Partial<I>]) {
+        if (args.length === 1 && typeof args[0] === "object" && args[0] !== null) {
+            const condition = args[0] as Partial<I>;
+            for (const key in condition) {
+                if (condition.hasOwnProperty(key)) {
+                    if (!condition[key]) continue;
+                    this.DB.orWhere(key, "LIKE", condition[key]);
+                }
+            }
+        } else {
+            if (!args[1]) return this
+            this.DB.orWhere(args[0], "LIKE", args[1]);
+        }
+
         return this;
     }
 
-    orWhereLike<K extends keyof I>(column: K, value: any) {
-        this.DB.orWhere(column, "LIKE", value);
+    whereNotLike<K extends keyof I>(column: K, value: any): this;
+    whereNotLike(args: Partial<I>): this;
+
+    whereNotLike(...args: [keyof I, any] | [Partial<I>]) {
+        if (args.length === 1 && typeof args[0] === "object" && args[0] !== null) {
+            const condition = args[0] as Partial<I>;
+            for (const key in condition) {
+                if (condition.hasOwnProperty(key)) {
+                    if (!condition[key]) continue;
+                    this.DB.where(key, "NOT LIKE", condition[key]);
+                }
+            }
+        } else {
+            if (!args[1]) return this
+            this.DB.where(args[0], "NOT LIKE", args[1]);
+        }
+
         return this;
     }
 
-    orWhereNotLike<K extends keyof I>(column: K, value: any) {
-        this.DB.orWhere(column, "NOT LIKE", value);
+
+    orWhereNotLike<K extends keyof I>(column: K, value: any): this;
+    orWhereNotLike(args: Partial<I>): this;
+
+    orWhereNotLike(...args: [keyof I, any] | [Partial<I>]) {
+        if (args.length === 1 && typeof args[0] === "object" && args[0] !== null) {
+            const condition = args[0] as Partial<I>;
+            for (const key in condition) {
+                if (condition.hasOwnProperty(key)) {
+                    if (!condition[key]) continue;
+                    this.DB.orWhere(key, "NOT LIKE", condition[key]);
+                }
+            }
+        } else {
+            if (!args[1]) return this
+            this.DB.orWhere(args[0], "NOT LIKE", args[1]);
+        }
+
+        return this;
+    }
+
+    whereColumnsLike(columns: (keyof I)[], value: any): this {
+        if (!value) return this;
+
+        columns.forEach((column, i) => {
+            if (i === 0) {
+                this.DB.where(column, "LIKE", value);
+            } else {
+                this.DB.orWhere(column, "LIKE", value);
+            }
+        });
+
         return this;
     }
 
@@ -867,6 +895,10 @@ export class Model<I> {
     // #endregion
 
     // #region Get
+    getRaw() {
+        return this.DB.getRaw();
+    }
+
     async get(): Promise<this[]> {
         this.DB.tbl = this.getTableName();
 
