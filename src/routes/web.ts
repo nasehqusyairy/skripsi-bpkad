@@ -9,6 +9,7 @@ import { RegisterRequest } from "@/app/requests/web/auth/RegisterRequest";
 import { AssignRoleRequest } from "@/app/requests/web/users/AssignRoleRequest";
 import { RoleRequest } from "@/app/requests/web/roles/RoleRequest";
 import { Router } from "@/utils/http/Router";
+import { ProfilBelanjaOPDController } from "@/app/controllers/web/ProfilBelanjaOPDController";
 
 const router = new Router();
 
@@ -31,6 +32,8 @@ router.group('/', router => {
     router.get('/dashboard', DashboardController.index);
 
     router.resource('posts', PostController);
+
+    router.get('/profil-belanja-opd', ProfilBelanjaOPDController.index);
 
     // Admin Only
     router.group('/', (router) => {
