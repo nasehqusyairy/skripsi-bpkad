@@ -11,7 +11,7 @@ export class UserController {
         const userId = parseInt(req.session.userId.toString());
         const pagination = await User.with("roles").whereNot({ id: userId }).paginate(page, perPage);
 
-        res.render("users/index", { pagination });
+        res.render("users/index", { pagination })
     }
 
     static roles: ControllerAction = async (req, res) => {

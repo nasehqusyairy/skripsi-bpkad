@@ -1,3 +1,4 @@
+import { BMOrg } from '@/app/models/BMOrg';
 import { Role } from '@/app/models/Role';
 import { User } from '@/app/models/User';
 import { addToBlacklist } from '@/utils/Blacklist';
@@ -8,25 +9,33 @@ import { decodeJwt, SignJWT } from 'jose';
 export class AuthController {
     // Menampilkan halaman login
     static index: ControllerAction = async (req, res) => {
-        res.render("auth/index");
+        const tahun_buku = (await BMOrg.select('tahun_buku').group().get()).map(item => item.tahun_buku);
+        res.render("auth/index", { tahun_buku });
     }
 
     static login: ControllerAction = async (req, res) => {
-        const { email, password } = req.body;
+        const { email, password, tahun_buku } = req.body;
         const user = await User.where({ email }).with('roles').first();
+
+        if (!tahun_buku) {
+            req.flash("error", "Pilih tahun buku terlebih dahulu!");
+            req.flash("old", { email });
+            return res.redirect("/auth");
+        }
 
         if (user && bcrypt.compareSync(password, user.password)) {
             req.session.userId = user.id;
             req.session.roles = (user.roles as unknown as Role[]).map(role => role.name);
+            req.session.tahun_buku = tahun_buku
 
             // Buat token JWT
             const secret = new TextEncoder().encode(process.env.SESSION_SECRET);
-            const token = await new SignJWT({ userId: user.id })
+            const token = await new SignJWT({ userId: user.id, tahun_buku })
                 .setProtectedHeader({ alg: 'HS256' })
                 .setExpirationTime(process.env.SESSION_TIMEOUT)
                 .sign(secret);
 
-            const decoded = decodeJwt(token);
+            const decoded = decodeJwt(token)
 
             // Set cookie
             res.cookie(process.env.SESSION_COOKIE_NAME, token, {

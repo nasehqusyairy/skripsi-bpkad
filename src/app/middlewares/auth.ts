@@ -18,13 +18,14 @@ const getUserFromToken = async (token: string) => {
     }
 
     const secret = new TextEncoder().encode(process.env.SESSION_SECRET);
-    const { payload } = await jwtVerify(token, secret) as { payload: { userId: string } };
+    const { payload } = await jwtVerify(token, secret) as { payload: { userId: string, tahun_buku: number } };
 
     const user = await User.where({ id: parseInt(payload.userId) }).with('roles').first();
 
     return {
         userId: payload.userId,
-        roles: (user.roles as unknown as Role[]).map(role => role.name)
+        roles: (user.roles as unknown as Role[]).map(role => role.name),
+        tahun_buku: payload.tahun_buku
     };
 };
 
@@ -49,17 +50,20 @@ export const apiAuth: Middleware = async (req, res, next) => {
  */
 export const webAuth: Middleware = async (req, res, next) => {
     if (req.session.userId) {
-        res.locals.user = { id: req.session.userId, roles: req.session.roles };
+        const { userId, roles, tahun_buku } = req.session;
+        res.locals.user = { userId, roles, tahun_buku };
         return next();
     }
 
     try {
         const token = req.cookies[process.env.SESSION_COOKIE_NAME];
-        const { userId, roles } = await getUserFromToken(token);
+        const { userId, roles, tahun_buku } = await getUserFromToken(token);
 
         req.session.userId = userId;
         req.session.roles = roles;
-        res.locals.user = { id: userId, roles };
+        req.session.tahun_buku = tahun_buku;
+
+        res.locals.user = { id: userId, roles, tahun_buku };
 
         next();
     } catch (error) {
