@@ -1,12 +1,15 @@
-import { DB } from "@/utils/database/DB";
+import { createQueryBuilder } from "@/utils/database/DB";
 import { Model } from "../Model";
 
+const DB = createQueryBuilder();
 
 export class BelongsTo<I, R> {
 
     model: typeof Model<R>;
     foreignKey: string;
     primaryKey: string;
+    DB: any
+
 
     constructor(model: typeof Model<R>, foreignKey: string, primaryKey: string) {
         this.model = model;

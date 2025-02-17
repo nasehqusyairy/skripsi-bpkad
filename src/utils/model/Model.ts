@@ -1,5 +1,5 @@
 import QueryBuilder from 'eloquent-query-builder';
-import { DB, MYSQL } from "@/utils/database/DB";
+import { createQueryBuilder, MYSQL } from "@/utils/database/DB";
 import { pluralize } from 'sequelize/lib/utils';
 import { Paginator } from './Paginator';
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
@@ -30,7 +30,7 @@ export class Model<I> {
 
     constructor(attributes: Partial<I> = {}) {
         this.assign(attributes);
-        this.DB = Object.assign(Object.create(Object.getPrototypeOf(DB)), DB);
+        this.DB = createQueryBuilder();
     }
 
     // #region Static Helpers
@@ -70,7 +70,7 @@ export class Model<I> {
      * @param {number|string} id - Nilai primary key.
      * @returns {Promise<Model<unknown>|null>} - Instance model atau null jika tidak ditemukan.
      */
-    static async find<T extends Model<unknown>>(this: new () => T, id: number | string): Promise<T | null> {
+    static async find<T extends Model<K>, K extends object>(this: new () => T, id: number | string): Promise<T | null> {
         const model = new this();
         model.DB.where(model.primaryKey, id);
         return await model.first();

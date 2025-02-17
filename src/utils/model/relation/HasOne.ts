@@ -1,6 +1,7 @@
-import { DB } from "@/utils/database/DB";
+import { createQueryBuilder } from "@/utils/database/DB";
 import { Model } from "../Model";
 
+const DB = createQueryBuilder();
 
 export class HasOne<I, R> {
 
