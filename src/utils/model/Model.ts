@@ -609,7 +609,7 @@ export class Model<I> {
             const condition = args[0] as Partial<I>;
             for (const key in condition) {
                 if (condition.hasOwnProperty(key)) {
-                    if (!(condition[key] as string).replace('%%', '')) continue;
+                    if (!(condition[key] as string)?.replace('%%', '')) continue;
                     this.DB.where(key, "LIKE", condition[key]);
                 }
             }
@@ -630,7 +630,7 @@ export class Model<I> {
             const condition = args[0] as Partial<I>;
             for (const key in condition) {
                 if (condition.hasOwnProperty(key)) {
-                    if (!(condition[key] as string).replace('%%', '')) continue;
+                    if (!(condition[key] as string)?.replace('%%', '')) continue;
                     this.DB.orWhere(key, "LIKE", condition[key]);
                 }
             }
@@ -650,7 +650,7 @@ export class Model<I> {
             const condition = args[0] as Partial<I>;
             for (const key in condition) {
                 if (condition.hasOwnProperty(key)) {
-                    if (!(condition[key] as string).replace('%%', '')) continue;
+                    if (!(condition[key] as string)?.replace('%%', '')) continue;
                     this.DB.where(key, "NOT LIKE", condition[key]);
                 }
             }
@@ -671,7 +671,7 @@ export class Model<I> {
             const condition = args[0] as Partial<I>;
             for (const key in condition) {
                 if (condition.hasOwnProperty(key)) {
-                    if (!(condition[key] as string).replace('%%', '')) continue;
+                    if (!(condition[key] as string)?.replace('%%', '')) continue;
                     this.DB.orWhere(key, "NOT LIKE", condition[key]);
                 }
             }
