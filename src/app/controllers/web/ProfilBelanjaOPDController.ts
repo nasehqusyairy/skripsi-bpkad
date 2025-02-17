@@ -7,7 +7,10 @@ export class ProfilBelanjaOPDController {
         const { search, page } = req.query
 
         const perPage = 10
-        const pagination = await BMOrg.where({ tahun_buku }).whereColumnsLike(['nama_org', 'kode_org'], `%${search}%`).paginate(page as unknown as number || 1, perPage)
+        const query = BMOrg.where({ tahun_buku }).whereColumnsLike(['nama_org', 'kode_org', 'id_org'], `%${search}%`)
+        const pagination = await query.paginate(page as unknown as number || 1, perPage)
+
+        console.log(query.getRaw());
 
         res.render("profil-belanja-opd/index", { pagination, search })
     }
