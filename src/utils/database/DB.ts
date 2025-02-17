@@ -21,4 +21,4 @@ const options: { host: string; logging: boolean; dialect: Dialect } = {
 }
 
 const sequelize = new Sequelize(database, user, password, options);
-export const DB = new QueryBuilder(sequelize);
+export const createQueryBuilder = () => new QueryBuilder(sequelize);

@@ -1,5 +1,5 @@
 import QueryBuilder from 'eloquent-query-builder';
-import { DB, MYSQL } from "@/utils/database/DB";
+import { createQueryBuilder, MYSQL } from "@/utils/database/DB";
 import { pluralize } from 'sequelize/lib/utils';
 import { Paginator } from './Paginator';
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
@@ -30,11 +30,12 @@ export class Model<I> {
 
     constructor(attributes: Partial<I> = {}) {
         this.assign(attributes);
-        this.DB = Object.assign(Object.create(Object.getPrototypeOf(DB)), DB).table(this.getTableName());
+        this.DB = createQueryBuilder();
     }
 
     // #region Static Helpers
     async first(): Promise<this | null> {
+        this.DB.tbl = this.getTableName();
         // Ambil data pertama dari database
         const data = await this.DB.first();
 
@@ -69,7 +70,7 @@ export class Model<I> {
      * @param {number|string} id - Nilai primary key.
      * @returns {Promise<Model<unknown>|null>} - Instance model atau null jika tidak ditemukan.
      */
-    static async find<T extends Model<unknown>>(this: new () => T, id: number | string): Promise<T | null> {
+    static async find<T extends Model<K>, K extends object>(this: new () => T, id: number | string): Promise<T | null> {
         const model = new this();
         model.DB.where(model.primaryKey, id);
         return await model.first();
@@ -140,12 +141,22 @@ export class Model<I> {
     // #region Order and Limit
     static groupBy<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, ...columns: (keyof K)[]): T {
         const model = new this();
+        model.DB.whereNot(columns[0], "''");
         model.DB.groupBy(...columns);
         return model;
     }
 
     groupBy<K extends keyof I>(...columns: K[]): this {
+        this.DB.whereNot(columns[0], "''");
         this.DB.groupBy(...columns);
+
+        return this;
+    }
+
+    group(): this {
+        const selectedColumns = this.DB.queryInital.split(',')
+        this.DB.whereNot(selectedColumns[0], "''");
+        this.DB.groupBy(...selectedColumns);
         return this;
     }
 
@@ -730,9 +741,27 @@ export class Model<I> {
 
     static async insert<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, dataArray: Partial<K>[]) {
         if (dataArray.length === 0) return 0;
+        if (dataArray.length === 0) return 0;
 
         const CHUNK_SIZE = 100;
+        const CHUNK_SIZE = 100;
         const modelInstance = new this();
+        const tableName = modelInstance.getTableName();
+        const columns = Object.keys(dataArray[0]);
+
+        let totalAffectedRows = 0;
+
+        // Membagi data menjadi beberapa batch
+        const chunks = chunkArray(dataArray, CHUNK_SIZE);
+
+        for (const chunk of chunks) {
+            const placeholders = chunk.map(() => `(${columns.map(() => "?").join(", ")})`).join(", ");
+            const values = chunk.flatMap(Object.values);
+
+            const query = `INSERT INTO ${tableName} (${columns.join(", ")}) VALUES ${placeholders}`;
+            const [{ affectedRows }] = await MYSQL.execute<ResultSetHeader>(query, values);
+            totalAffectedRows += affectedRows;
+        }
         const tableName = modelInstance.getTableName();
         const columns = Object.keys(dataArray[0]);
 
@@ -858,6 +887,8 @@ export class Model<I> {
 
     // #region Get
     async get(): Promise<this[]> {
+        this.DB.tbl = this.getTableName();
+
         // Ambil data utama
         let results = await this.DB.get();
 
@@ -872,6 +903,7 @@ export class Model<I> {
     }
 
     async paginate(page: number, perPage: number) {
+        this.DB.tbl = this.getTableName();
         const pagination = await this.DB.paginate(page, perPage);
 
         // Ubah result menjadi instance model
@@ -924,6 +956,11 @@ export class Model<I> {
     // #endregion
 }
 
+function chunkArray<T>(array: T[], chunkSize: number): T[][] {
+    return Array.from({ length: Math.ceil(array.length / chunkSize) }, (_, i) =>
+        array.slice(i * chunkSize, i * chunkSize + chunkSize)
+    );
+}
 function chunkArray<T>(array: T[], chunkSize: number): T[][] {
     return Array.from({ length: Math.ceil(array.length / chunkSize) }, (_, i) =>
         array.slice(i * chunkSize, i * chunkSize + chunkSize)
