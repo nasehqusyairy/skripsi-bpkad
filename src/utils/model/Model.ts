@@ -155,8 +155,7 @@ export class Model<I> {
 
     group(): this {
         const selectedColumns = this.DB.queryInital.split(',')
-        this.DB.whereNot(selectedColumns[0], "''");
-        this.DB.groupBy(...selectedColumns);
+        this.groupBy(...selectedColumns)
         return this;
     }
 
