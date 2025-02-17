@@ -21,4 +21,28 @@ const options: { host: string; logging: boolean; dialect: Dialect } = {
 }
 
 const sequelize = new Sequelize(database, user, password, options);
-export const createQueryBuilder = () => new QueryBuilder(sequelize);
+export const createQueryBuilder = () => {
+    const queryBuilder = new QueryBuilder(sequelize);
+
+    // Simpan referensi ke metode orWhere asli
+    const originalOrWhere = queryBuilder.orWhere;
+
+    // Override fungsi orWhere
+    queryBuilder.orWhere = function (...args: any[]) {
+
+        if (!this.query || !this.whereParams) {
+            throw new Error('Where clause must be defined before using orWhere');
+        }
+
+        const operatorAndVal = args.length > 2 ? ` ${args[1]} ${this.getStrParam(args[2])}` : ` = ${this.getStrParam(args[1])}`;
+
+        const qryString = ` OR ${args[0]}${operatorAndVal}`;
+        this.orWhereParams.push(qryString);
+        this.query += qryString;
+
+        // Panggil fungsi asli dengan konteks yang telah dimodifikasi
+        return originalOrWhere.apply(this, args);
+    };
+
+    return queryBuilder;
+};
