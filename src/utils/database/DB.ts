@@ -30,15 +30,15 @@ export const createQueryBuilder = () => {
     // Override fungsi orWhere
     queryBuilder.orWhere = function (...args: any[]) {
 
-        if (!this.query || !this.whereParams) {
+        if (!queryBuilder.query || !queryBuilder.whereParams) {
             throw new Error('Where clause must be defined before using orWhere');
         }
 
-        const operatorAndVal = args.length > 2 ? ` ${args[1]} ${this.getStrParam(args[2])}` : ` = ${this.getStrParam(args[1])}`;
+        const operatorAndVal = args.length > 2 ? ` ${args[1]} ${queryBuilder.getStrParam(args[2])}` : ` = ${queryBuilder.getStrParam(args[1])}`;
 
         const qryString = ` OR ${args[0]}${operatorAndVal}`;
-        this.orWhereParams.push(qryString);
-        this.query += qryString;
+        queryBuilder.orWhereParams.push(qryString);
+        queryBuilder.query += qryString;
 
         // Panggil fungsi asli dengan konteks yang telah dimodifikasi
         return originalOrWhere.apply(this, args);
