@@ -24,9 +24,6 @@ const sequelize = new Sequelize(database, user, password, options);
 export const createQueryBuilder = () => {
     const queryBuilder = new QueryBuilder(sequelize);
 
-    // Simpan referensi ke metode orWhere asli
-    const originalOrWhere = queryBuilder.orWhere;
-
     // Override fungsi orWhere
     queryBuilder.orWhere = function (...args: any[]) {
 
@@ -45,7 +42,6 @@ export const createQueryBuilder = () => {
         queryBuilder.orWhereParams.push(qryString);
         queryBuilder.query += qryString;
 
-        // Panggil fungsi asli dengan konteks yang telah dimodifikasi
         return queryBuilder;
     };
 
