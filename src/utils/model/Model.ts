@@ -353,12 +353,12 @@ export class Model<I> {
         if (args.length === 1 && typeof args[0] === "object" && args[0] !== null) {
             for (const key in args[0]) {
                 if (args[0].hasOwnProperty(key)) {
-                    if (!args[0][key]) continue;
+                    if (!(args[0][key] as string).replace('%', '')) continue;
                     model.DB.where(key, "LIKE", args[0][key]);
                 }
             }
         } else {
-            if (!args[1]) return model;
+            if (!(args[1] as string).replace('%', '')) return model;
             model.DB.where(args[0], "LIKE", args[1]);
         }
 
@@ -374,12 +374,12 @@ export class Model<I> {
         if (args.length === 1 && typeof args[0] === "object" && args[0] !== null) {
             for (const key in args[0]) {
                 if (args[0].hasOwnProperty(key)) {
-                    if (!args[0][key]) continue;
+                    if (!(args[0][key] as string).replace('%', '')) continue;
                     model.DB.where(key, "NOT LIKE", args[0][key]);
                 }
             }
         } else {
-            if (!args[1]) return model
+            if (!(args[1] as string).replace('%', '')) return model
             model.DB.where(args[0], "NOT LIKE", args[1]);
         }
 
@@ -389,7 +389,7 @@ export class Model<I> {
     static whereColumnsLike<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, columns: (keyof K)[], value: any): T {
         const model = new this();
 
-        if (!value) return model;
+        if (!value.replace('%', '')) return model;
 
         columns.forEach((column, i) => {
             if (i === 0) {
@@ -605,12 +605,12 @@ export class Model<I> {
             const condition = args[0] as Partial<I>;
             for (const key in condition) {
                 if (condition.hasOwnProperty(key)) {
-                    if (!condition[key]) continue;
+                    if (!(condition[key] as string).replace('%', '')) continue;
                     this.DB.where(key, "LIKE", condition[key]);
                 }
             }
         } else {
-            if (!args[1]) return this;
+            if (!(args[1] as string).replace('%', '')) return this;
             // Jika hanya key dan value, gunakan "LIKE"
             this.DB.where(args[0], "LIKE", args[1]);
         }
@@ -626,12 +626,12 @@ export class Model<I> {
             const condition = args[0] as Partial<I>;
             for (const key in condition) {
                 if (condition.hasOwnProperty(key)) {
-                    if (!condition[key]) continue;
+                    if (!(condition[key] as string).replace('%', '')) continue;
                     this.DB.orWhere(key, "LIKE", condition[key]);
                 }
             }
         } else {
-            if (!args[1]) return this
+            if (!(args[1] as string).replace('%', '')) return this
             this.DB.orWhere(args[0], "LIKE", args[1]);
         }
 
@@ -646,12 +646,12 @@ export class Model<I> {
             const condition = args[0] as Partial<I>;
             for (const key in condition) {
                 if (condition.hasOwnProperty(key)) {
-                    if (!condition[key]) continue;
+                    if (!(condition[key] as string).replace('%', '')) continue;
                     this.DB.where(key, "NOT LIKE", condition[key]);
                 }
             }
         } else {
-            if (!args[1]) return this
+            if (!(args[1] as string).replace('%', '')) return this
             this.DB.where(args[0], "NOT LIKE", args[1]);
         }
 
@@ -667,12 +667,12 @@ export class Model<I> {
             const condition = args[0] as Partial<I>;
             for (const key in condition) {
                 if (condition.hasOwnProperty(key)) {
-                    if (!condition[key]) continue;
+                    if (!(condition[key] as string).replace('%', '')) continue;
                     this.DB.orWhere(key, "NOT LIKE", condition[key]);
                 }
             }
         } else {
-            if (!args[1]) return this
+            if (!(args[1] as string).replace('%', '')) return this
             this.DB.orWhere(args[0], "NOT LIKE", args[1]);
         }
 
@@ -680,7 +680,7 @@ export class Model<I> {
     }
 
     whereColumnsLike(columns: (keyof I)[], value: any): this {
-        if (!value) return this;
+        if (!value.replace('%', '')) return this;
 
         columns.forEach((column, i) => {
             if (i === 0) {
