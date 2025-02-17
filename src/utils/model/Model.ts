@@ -741,27 +741,9 @@ export class Model<I> {
 
     static async insert<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, dataArray: Partial<K>[]) {
         if (dataArray.length === 0) return 0;
-        if (dataArray.length === 0) return 0;
 
-        const CHUNK_SIZE = 100;
         const CHUNK_SIZE = 100;
         const modelInstance = new this();
-        const tableName = modelInstance.getTableName();
-        const columns = Object.keys(dataArray[0]);
-
-        let totalAffectedRows = 0;
-
-        // Membagi data menjadi beberapa batch
-        const chunks = chunkArray(dataArray, CHUNK_SIZE);
-
-        for (const chunk of chunks) {
-            const placeholders = chunk.map(() => `(${columns.map(() => "?").join(", ")})`).join(", ");
-            const values = chunk.flatMap(Object.values);
-
-            const query = `INSERT INTO ${tableName} (${columns.join(", ")}) VALUES ${placeholders}`;
-            const [{ affectedRows }] = await MYSQL.execute<ResultSetHeader>(query, values);
-            totalAffectedRows += affectedRows;
-        }
         const tableName = modelInstance.getTableName();
         const columns = Object.keys(dataArray[0]);
 
@@ -956,11 +938,6 @@ export class Model<I> {
     // #endregion
 }
 
-function chunkArray<T>(array: T[], chunkSize: number): T[][] {
-    return Array.from({ length: Math.ceil(array.length / chunkSize) }, (_, i) =>
-        array.slice(i * chunkSize, i * chunkSize + chunkSize)
-    );
-}
 function chunkArray<T>(array: T[], chunkSize: number): T[][] {
     return Array.from({ length: Math.ceil(array.length / chunkSize) }, (_, i) =>
         array.slice(i * chunkSize, i * chunkSize + chunkSize)
