@@ -391,13 +391,17 @@ export class Model<I> {
 
         if (!value.replace('%%', '')) return model;
 
+        let query = ''
+
         columns.forEach((column, i) => {
             if (i === 0) {
-                model.DB.where(column, "LIKE", value);
+                query += ` ( ${column as string} LIKE '${value}'`
             } else {
-                model.DB.orWhere(column, "LIKE", value);
+                query += ` OR ${column as string} LIKE '${value}'`
             }
         });
+
+        model.DB.query += query + ' ) '
 
         return model;
     }
@@ -682,13 +686,17 @@ export class Model<I> {
     whereColumnsLike(columns: (keyof I)[], value: any): this {
         if (!value.replace('%%', '')) return this;
 
+        let query = ''
+
         columns.forEach((column, i) => {
             if (i === 0) {
-                this.DB.where(column, "LIKE", value);
+                query += ` AND ( ${column as string} LIKE '${value}'`
             } else {
-                this.DB.orWhere(column, "LIKE", value);
+                query += ` OR ${column as string} LIKE '${value}'`
             }
         });
+
+        this.DB.query += query + ' ) '
 
         return this;
     }
