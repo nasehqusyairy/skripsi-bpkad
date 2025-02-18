@@ -15,10 +15,6 @@
     "removeComments": true,
   },
   "include": [
-    "src/**/*",
-    "commands/Scaffolder.js",
-    "commands/SeedScaffolder.js",
-    "commands/Migrate.js",
-    "commands/Rollback.js",
+    "src/**/*"
   ]
 }
