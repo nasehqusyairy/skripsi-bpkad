@@ -56,7 +56,7 @@ export const createQueryBuilder = () => {
         } else {
             const operatorAndVal = args.length > 2 ? ` ${args[1]} ${queryBuilder.getStrParam(args[2])}` : ` = ${queryBuilder.getStrParam(args[1])}`;
 
-            if (queryBuilder.whereParams || queryBuilder.query) {
+            if (queryBuilder.whereParams || queryBuilder.query && !queryBuilder.query.endsWith('(')) {
                 const qryString = ` AND ${args[0]}${operatorAndVal}`;
                 if (!queryBuilder.whereParams) {
                     queryBuilder.whereParams = [];

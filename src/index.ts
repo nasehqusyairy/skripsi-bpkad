@@ -85,15 +85,7 @@ app.use((req, res, next) => {
 
 // Middleware untuk menambahkan fungsi url() ke res.locals
 app.use((req, res, next) => {
-    res.locals.url = () => {
-        return {
-            current: req.originalUrl,
-            previous: req.get('Referrer'),
-            host: req.get('host'),
-            protocol: req.protocol,
-            query: req.query
-        }
-    };
+    res.locals.url = () => new URL(req.protocol + '://' + req.get('host') + req.originalUrl);
     next();
 });
 
@@ -130,13 +122,16 @@ app.use((req, res, next) => {
 });
 
 // 404
-app.use((req, res, next) => {
+app.use((req, res) => {
     res.status(404).render('404');
 })
 
 // 500
-app.use((err: Error, req: Request, res: express.Response, next: express.NextFunction) => {
-    console.error(err);
+app.use((err: HttpError, req: Request, res: express.Response, next: express.NextFunction) => {
+    console.error(err.message);
+    if (err.statusCode === 404) {
+        return res.status(404).render('404');
+    }
     res.status(500).render('500');
 });
 //#endregion
