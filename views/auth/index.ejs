@@ -15,7 +15,7 @@
 
         <% } %>
 
-        <form action="/auth/login/?next=<%=url().query.next%>" method="POST">
+        <form action="/auth/login/?next=<%=url().search.next%>" method="POST">
           <%- csrfField() %>
 
           <div class="mb-3">

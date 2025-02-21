@@ -1,0 +1,17 @@
+<% layout('layouts/admin') %>
+
+<select name="nama_org" id="nama_org" class="form-select mt-5">
+    <option value="">Pilih OPD...</option>
+</select>
+
+<script>
+
+const autocompleteInput = new AutoCompleteInput({
+    selectId: 'nama_org', // ID dari input
+    apiUrl: 'http://localhost:8000/api/orgs?tahun_buku=2022', // URL endpoint API
+    debounceTime: 750,
+    keyToDisplay: 'nama_org', // Key yang akan ditampilkan pada dropdown
+    keyToBeValue: 'id_org' // Key yang akan dijadikan value pada dropdown
+});
+
+</script>

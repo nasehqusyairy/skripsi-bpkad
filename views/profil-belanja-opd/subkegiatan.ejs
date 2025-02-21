@@ -1,6 +1,6 @@
 <%
   layout('layouts/admin')
-  const  listKegiatan  = pagination.results || []
+  const  listSubkegiatan  = pagination.results || []
   const ourl = url()
   ourl.searchParams.delete('page')
 
@@ -10,34 +10,32 @@
 <div class="container">
   <div class="row">
     <div class="col-md-12">
-      <h1 class="mt-4">Profil Belanja OPD</h1>
+      <h1 class="mt-4 text-truncate">Kegiatan: <%= kegiatan.nama_kegiatan %></h1>
+
+      <table class="mb-3">
+        <tr>
+            <th>OPD</th>
+            <td class="px-3">:</td>
+            <td><%= org.nama_org %></td>
+        </tr>
+        <tr>
+            <th>Tahun</th>
+            <td class="px-3">:</td>
+            <td><%= tahun_buku %></td>
+        </tr>
+        <tr>
+            <th>Tahapan</th>
+            <td class="px-3">:</td>
+            <td><%= tahapan.nama %></td>
+        </tr>
+      </table>
 
       <form action="">
-      <div class="card mb-3">
-        <div class="card-body">
-                <div class="input-group">
-                    <select name="id_org" id="nama_org" class="form-select">
-                        <option value="">Pilih OPD...</option>
-                        <% if(org){ %>
-                        <option value="<%= org?.id_org %>" selected><%= org?.nama_org %></option>
-                        <% } %>
-                    </select>
-                    <select name="id_tahapan" id="nama_tahapan" class="form-select" required>
-                        <option value="">Pilih Tahapan...</option>
-                        <% if(tahapan){ %>
-                        <option value="<%= tahapan?.id %>" selected><%= tahapan?.nama %></option>
-                        <% } %>
-                    </select>
-                    <button class="btn btn-primary">Saring</button>
-                </div>
-        </div>
-      </div>
-
       <div class="card">
         <div class="card-body">
                 <div class="mb-3">
                     <div class="input-group">
-                        <input type="text" class="form-control" id="search" name="search" value="<%=search %>" placeholder="Cari Kegiatan...">
+                        <input type="text" class="form-control" id="search" name="search" value="<%=search %>" placeholder="Cari Subkegiatan...">
                         <button class="btn btn-primary">Cari</button>
                     </div>
                 </div>
@@ -46,19 +44,19 @@
               <tr>
                 <th>#</th>
                 <th>Kode</th>
-                <th>Nama Kegiatan</th>
+                <th>Nama Subkegiatan</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
               <% const startIndex = (pagination.currentPage - 1) * pagination.perPage; %>
-              <% listKegiatan.forEach((kegiatan, i) => { %>
+              <% listSubkegiatan.forEach((subkegiatan, i) => { %>
               <tr>
                 <td><%= startIndex + i + 1 %></td>
-                <td><%= kegiatan?.kode_kegiatan %></td>
-                <td><%= kegiatan?.nama_kegiatan %></td>
+                <td><%= subkegiatan.kode_subkegiatan %></td>
+                <td><%= subkegiatan.nama_subkegiatan %></td>
                 <td>
-                  <a href="/profil-belanja-opd/<%=org?.id_org%>/sub-kegiatan/<%= kegiatan?.id_kegiatan %>/<%= tahapan?.id %>" class="btn btn-warning">Detail</a>
+                    <a href="#" class="btn btn-warning">Detail</a>
                 </td>
               </tr>
               <% }) %>

@@ -34,6 +34,10 @@ router.group('/', router => {
     router.resource('posts', PostController);
 
     router.get('/profil-belanja-opd', ProfilBelanjaOPDController.index);
+    router.get('/profil-belanja-opd/:id_org/sub-kegiatan/:id_kegiatan/:id_tahapan', ProfilBelanjaOPDController.subkegiatan);
+    router.get('/testing', (req, res) => {
+        res.render('testing');
+    })
 
     // Admin Only
     router.group('/', (router) => {
