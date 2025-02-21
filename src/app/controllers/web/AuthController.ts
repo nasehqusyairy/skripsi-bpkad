@@ -13,7 +13,7 @@ export class AuthController {
 
     static login: ControllerAction = async (req, res) => {
         const { email, password } = req.body;
-        const user = await User.where({ email }).with('roles').first();
+        const user = await User.with('roles').where({ email }).first();
 
         if (user && bcrypt.compareSync(password, user.password)) {
             req.session.userId = user.id;

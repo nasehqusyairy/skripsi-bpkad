@@ -877,27 +877,116 @@ export class Model<I> {
     // #endregion
 
     // #region With
-
     // Method untuk eager loading, simpan nama relasi beserta objek relasi yang dikembalikan
+    with<T extends keyof this>(...relations: T[]): this {
+        const newRelations = this.parseRelations(relations as string[]);
+
+        relations.forEach(relation => {
+
+            const existingRelation = this._eagerLoading.find(r => r.name === relation);
+            if (!existingRelation) {
+                this._eagerLoading.push(newRelations.find(r => r.name === relation));
+            } else {
+                this._eagerLoading[this._eagerLoading.indexOf(existingRelation)] = newRelations.find(r => r.name === relation);
+            }
+
+        });
+
+        return this;
+    }
+
     static with<T extends Model<unknown>>(this: new () => T, ...relations: (keyof T)[]) {
         const modelInstance = new this();
-        modelInstance._eagerLoading = relations.map(relation => {
-            // Mengambil objek relasi dari setiap fungsi relasi
-            const relationObj = (modelInstance as any)[relation]();
+        modelInstance._eagerLoading = modelInstance.parseRelations(relations as string[]);
+        return modelInstance;
+    }
 
-            return { relation, ...relationObj };
-        });
+    include(relation: string, callback?: (relation: QueryBuilder, pivot?: QueryBuilder) => void) {
+        const newRelation = this.parseRelations([relation])[0];
+        const existingRelation = this._eagerLoading.find(r => r.name === newRelation.name);
+        if (!existingRelation) {
+            this._eagerLoading.push({ name: relation, nested: [], callback });
+        } else {
+            this._eagerLoading[this._eagerLoading.indexOf(existingRelation)] = newRelation
+        }
+
+        // console.log(this._eagerLoading[1]?.nested);
+        return this;
+    }
+
+    static include(relation: string, callback?: (realtion: QueryBuilder, pivot?: QueryBuilder) => void) {
+        const modelInstance = new this();
+
+        const newRelation = modelInstance.parseRelations([relation])[0];
+        const existingRelation = modelInstance._eagerLoading.find(r => r.name === newRelation.name);
+        if (!existingRelation) {
+            modelInstance._eagerLoading.push({ name: relation, nested: [], callback });
+        } else {
+            modelInstance._eagerLoading[modelInstance._eagerLoading.indexOf(existingRelation)] = newRelation
+        }
 
         return modelInstance;
     }
 
-    with<T extends keyof this>(...relations: T[]): this {
-        this._eagerLoading = relations.map(relation => {
-            const relationObj = (this[relation] as Function)();
-            return { relation, ...relationObj };
-        });
+    thenInclude(relation: string, callback?: (query: any) => void) {
+        if (this._eagerLoading.length === 0) {
+            throw new Error("thenInclude() harus dipanggil setelah include()");
+        }
 
+        let lastRelation = this._eagerLoading[this._eagerLoading.length - 1];
+
+        lastRelation.nested.push({ name: relation, nested: [], callback });
         return this;
+    }
+
+    private parseRelations(relations: string[]) {
+        const parsedRelations = [];
+        for (const relation of relations) {
+            const parts = relation.split(".");
+            let current = parsedRelations;
+
+            for (const part of parts) {
+                let existing = current.find(r => r.name === part);
+                if (!existing) {
+                    existing = { name: part, nested: [] };
+                    current.push(existing);
+                }
+                current = existing.nested;
+            }
+        }
+        return parsedRelations;
+    }
+
+    private async eagerLoadRelations(results: this[], relations: any[] = this._eagerLoading, parentModel: any = this) {
+
+
+        for (const { name, nested, callback } of relations) {
+            const relationInstance = parentModel[name]();
+            const key = relationInstance.constructor.name == "BelongsTo" ? relationInstance.foreignKey : this.primaryKey;
+            const ids = (results as unknown as Partial<I>[]).map((result: Partial<I>) => result[key]);
+
+            let relatedQuery = relationInstance.fetch(ids, callback);
+            let relatedData = await relatedQuery;
+
+            relationInstance.attachResults(results, relatedData, name);
+
+            if (nested.length > 0) {
+                relatedData = relatedData.map((item: any) => new relationInstance.model(item))
+                await this.eagerLoadRelations(relatedData, nested, new relationInstance.model());
+            }
+        }
+    }
+
+    async get(): Promise<this[]> {
+        this.DB.tbl = this.getTableName();
+        let results = await this.DB.get();
+
+        const ModelConstructor = this.constructor as { new(attributes: any): Model<I> };
+        results = results.map((result: Partial<I>) => new ModelConstructor(result));
+
+        await this.eagerLoadRelations(results);
+
+        return results;
     }
 
     // #endregion
@@ -905,22 +994,6 @@ export class Model<I> {
     // #region Get
     getRaw() {
         return this.DB.getRaw();
-    }
-
-    async get(): Promise<this[]> {
-        this.DB.tbl = this.getTableName();
-
-        // Ambil data utama
-        let results = await this.DB.get();
-
-        // Buat seluruh data menjadi instance model
-        const ModelConstructor = this.constructor as { new(attributes: any): Model<I> };
-        results = results.map((result: Partial<I>) => new ModelConstructor(result));
-
-        // Lakukan eager loading
-        await this.eagerLoadRelations(results);
-
-        return results;
     }
 
     async paginate(page: number, perPage: number) {
@@ -936,20 +1009,6 @@ export class Model<I> {
 
         // Kembalikan instance Paginator
         return new Paginator<this>(pagination);
-    }
-
-    private async eagerLoadRelations(results: this[]) {
-        if (this._eagerLoading.length > 0) {
-            for (const { relation } of this._eagerLoading) {
-                const relationInstance = this[relation]();
-
-                const key = relationInstance.constructor.name == "BelongsTo" ? relationInstance.foreignKey : this.primaryKey;
-                const ids = (results as unknown as Partial<I>[]).map((result: Partial<I>) => result[key]);
-
-                const relatedData = await relationInstance.fetch(ids);
-                relationInstance.attachResults(results, relatedData, relation);
-            }
-        }
     }
 
     // #endregion

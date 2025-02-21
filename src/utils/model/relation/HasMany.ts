@@ -8,7 +8,6 @@ export class HasMany<I, R> {
 
     model: typeof Model<R>;
     foreignKey: string;
-    DB: QueryBuilder;
 
     constructor(model: typeof Model<R>, foreignKey: string) {
         this.model = model;
@@ -16,12 +15,16 @@ export class HasMany<I, R> {
 
     }
 
-    async fetch(ids: any[]): Promise<object[]> {
-        return await DB.table(this.model.getTableName()).whereIn(this.foreignKey, ids).get();
+    async fetch(ids: any[], callback?: (qry: QueryBuilder) => void): Promise<object[]> {
+        const query = DB.table(this.model.getTableName()).whereIn(this.foreignKey, ids);
+        callback && callback(query);
+        return await query.get();
     }
 
     attachResults(results: Model<I>[], relatedData: object[], relationName: string) {
         results.forEach((result) => {
+            if (!result.getPrimaryKey) console.log(result);
+
             result[relationName] = relatedData.filter(item => item[this.foreignKey] === result[result.getPrimaryKey()]);
             result.attributes[relationName] = result[relationName];
         });

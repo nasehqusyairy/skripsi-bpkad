@@ -12,7 +12,7 @@ export class Role extends Model<IRole> implements IRole {
     constructor(attributes: Partial<IRole> = {}) {
         super(attributes);
     }
-
+    
     // implementasi interface
         id: number;
     name?: string;
