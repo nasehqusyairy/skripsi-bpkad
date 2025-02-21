@@ -20,7 +20,7 @@ const getUserFromToken = async (token: string) => {
     const secret = new TextEncoder().encode(process.env.SESSION_SECRET);
     const { payload } = await jwtVerify(token, secret) as { payload: { userId: string, tahun_buku: number } };
 
-    const user = await User.where({ id: parseInt(payload.userId) }).with('roles').first();
+    const user = await User.with('roles').where({ id: parseInt(payload.userId) }).first();
 
     return {
         userId: payload.userId,

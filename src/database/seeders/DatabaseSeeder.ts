@@ -9,6 +9,7 @@ import { BMProgramSeeder } from "./BMProgramSeeder";
 import { BMSshbdSeeder } from "./BMSshbdSeeder";
 import { BMSubkegiatanSeeder } from "./BMSubkegiatanSeeder";
 import { MTahapanSeeder } from "./MTahapanSeeder";
+import { CommentSeeder } from "./CommentSeeder";
 import { PostSeeder } from "./PostSeeder";
 import { RoleSeeder } from "./RoleSeeder";
 import { RoleUserSeeder } from "./RoleUserSeeder";
@@ -25,6 +26,7 @@ import { UserSeeder } from "./UserSeeder";
         BMSshbdSeeder,
         BMSubkegiatanSeeder,
         MTahapanSeeder,
+        CommentSeeder,
         PostSeeder,
         RoleSeeder,
         RoleUserSeeder,

@@ -1,7 +1,7 @@
-import { MYSQL as DB } from "@/utils/database/DB";
+import QueryBuilder from 'eloquent-query-builder';
+import { createQueryBuilder, MYSQL as DB } from "@/utils/database/DB";
 import { Model } from "../Model";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
-
 
 export class BelongsToMany<I, R> {
 
@@ -62,12 +62,18 @@ export class BelongsToMany<I, R> {
         return result?.affectedRows ?? 0; // Pastikan `affectedRows` ada
     }
 
-    async fetch(ids: any[]): Promise<GroupedData> {
+    async fetch(ids: any[], callback?: (relation: QueryBuilder, pivot?: QueryBuilder) => void): Promise<GroupedData> {
+
+        const adittionalRelationQuery = createQueryBuilder();
+        const adittionalPivotQuery = createQueryBuilder();
+
+        callback && callback(adittionalRelationQuery, adittionalPivotQuery);
+
         // Ambil data dari tabel pivot hanya sekali
         const pivotQuery = `
         SELECT * FROM ${this.pivotTable}
         WHERE ${this.foreignKey} IN (${ids.map(() => "?").join(",")})
-        `;
+        ${adittionalPivotQuery.query ? `AND ${adittionalPivotQuery.query}` : ''}`;
 
         const [pivotResults] = await DB.execute<RowDataPacket[]>(pivotQuery, ids);
 
@@ -79,7 +85,7 @@ export class BelongsToMany<I, R> {
             const relatedQuery = `
                 SELECT * FROM ${this.model.getTableName()}
                 WHERE ${this.model.getPrimaryKey()} IN (${relatedIds.map(() => "?").join(",")})
-            `;
+            ${callback ? `AND ${adittionalRelationQuery.query}` : ''}`;
 
             [relatedResults] = await DB.execute<RowDataPacket[]>(relatedQuery, relatedIds);
         }

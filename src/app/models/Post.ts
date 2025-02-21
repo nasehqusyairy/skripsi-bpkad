@@ -1,5 +1,6 @@
 import { Model } from "@/utils/model/Model";
 import { User } from "./User";
+import { Comment } from "./Comment";
 
 export interface IPost {
     id: number;
@@ -16,7 +17,7 @@ export class Post extends Model<IPost> implements IPost {
     }
 
     // implementasi interface
-        id: number;
+    id: number;
     user_id: number;
     title?: string;
     content?: string;
@@ -25,6 +26,10 @@ export class Post extends Model<IPost> implements IPost {
 
     // Tambahkan relasi manual di sini jika diperlukan
     user() {
-        return this.belongsTo(User, 'user_id');
+        return this.belongsTo(User);
+    }
+
+    comments() {
+        return this.hasMany(Comment);
     }
 }

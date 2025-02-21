@@ -1,3 +1,4 @@
+import QueryBuilder from 'eloquent-query-builder';
 import { createQueryBuilder } from "@/utils/database/DB";
 import { Model } from "../Model";
 
@@ -8,7 +9,6 @@ export class BelongsTo<I, R> {
     model: typeof Model<R>;
     foreignKey: string;
     primaryKey: string;
-    DB: any
 
 
     constructor(model: typeof Model<R>, foreignKey: string, primaryKey: string) {
@@ -17,8 +17,10 @@ export class BelongsTo<I, R> {
         this.primaryKey = primaryKey;
     }
 
-    async fetch(ids: any[]): Promise<object[]> {
-        return await DB.table(this.model.getTableName()).whereIn(this.primaryKey, ids).get();
+    async fetch(ids: any[], callback?: (qry: QueryBuilder) => void): Promise<object[]> {
+        const query = DB.table(this.model.getTableName()).whereIn(this.primaryKey, ids);
+        callback && callback(query);
+        return await query.get();
     }
 
     attachResults(results: Model<I>[], relatedData: object[], relationName: string) {
