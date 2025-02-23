@@ -321,7 +321,8 @@ async function main() {
             await scaffoldFind();
             break;
         default:
-            await generate();
+            const config = process.env.SCAFFOLDING_SOURCE_TABLES;
+            await generate(config ? config.split(",").map(e => e.trim()) : undefined);
             break;
     }
 }
