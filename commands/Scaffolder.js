@@ -56,8 +56,13 @@ async function generate(targetTables) {
 
         // Buat file model (hanya untuk tabel yang bukan pivot)
 
-        if (!tableName.includes("_") && (isWillScaffoldAllTables || targetTables.length > 0)) {
-            createdModels.push(await generateModel(tableName, columns, allTables));
+        // tabel pivot diasumsikan merupakan tabel yang mengandung _. jika tabel di dalam konfigurasi atau di dalam parameter mengandung _, maka larangan tabel pivot tidak berlaku
+        // cari apakah di dalam konfigurasi atau di dalam parameter terdapat tabel yang mengandung _
+        const isItemLikePivotExistInParameter = targetTables.some(t => t.includes("_")) || process.env.SCAFFOLDING_SOURCE_TABLES?.split(",").some(t => t.includes("_"));
+        if (targetTables.length > 0) {
+            if (!isPivotTable(tableName) || isItemLikePivotExistInParameter) {
+                createdModels.push(await generateModel(tableName, columns, allTables));
+            }
         }
     }
 
@@ -292,9 +297,7 @@ async function scaffoldNewTables() {
     const existingMigrations = await getExistingMigrations();
     const existingModels = await getExistingModels();
 
-    const isSorceConfigured = process.env.SCAFFOLDING_SOURCE_TABLES;
-
-    const newTables = allTables.filter(table => (!(existingMigrations.includes(table.toLowerCase()) && existingModels.map(m => pluralize(m)).includes(table.toLowerCase()))) && (process.env.SCAFFOLDING_SOURCE_TABLES || !isPivotTable(table)));
+    const newTables = allTables.filter(table => (!(existingMigrations.includes(table.toLowerCase()) && existingModels.map(m => pluralize(m)).includes(table.toLowerCase()))) && (!process.env.SCAFFOLDING_SOURCE_TABLES || !isPivotTable(table)));
 
     if (newTables.length === 0) {
         console.log('\x1b[33m%s\x1b[0m', 'Tidak ada tabel baru untuk di-scaffold.');
