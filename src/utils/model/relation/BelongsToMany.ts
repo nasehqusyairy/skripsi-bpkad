@@ -63,7 +63,9 @@ export class BelongsToMany<I, R> {
     }
 
     async fetch(ids: any[], callback?: (relation: QueryBuilder, pivot?: QueryBuilder) => void): Promise<GroupedData> {
-
+        if (ids.length === 0) {
+            return {};
+        }
         const adittionalRelationQuery = createQueryBuilder();
         const adittionalPivotQuery = createQueryBuilder();
 

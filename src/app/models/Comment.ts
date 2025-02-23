@@ -11,18 +11,10 @@ export interface IComment {
     updated_at: string;
 }
 
-export class Comment extends Model<IComment> implements IComment {
-    constructor(attributes: Partial<IComment> = {}) {
-        super(attributes);
+export class Comment extends Model<IComment> {
+    constructor() {
+        super();
     }
-    
-    // implementasi interface
-        id: number;
-    user_id: number;
-    post_id: number;
-    body: string;
-    created_at: string;
-    updated_at: string;
 
     // Tambahkan relasi manual di sini jika diperlukan
     user() {

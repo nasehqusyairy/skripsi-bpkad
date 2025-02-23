@@ -19,7 +19,7 @@ export class UserController {
         const u = await User.find(req.params.id);
         await u.load('roles');
 
-        const userRoles = u.roles as unknown as Role[];
+        const userRoles = u.attributes.roles;
         const userRoleIds = userRoles.map(role => role.id);
         const query = Role.whereNot({ id: 1 });
 
@@ -32,14 +32,14 @@ export class UserController {
 
     static assignRole: ControllerAction = async (req, res) => {
 
-        const u = new User({ id: parseInt(req.params.id) });
+        const u = User.assign({ id: parseInt(req.params.id) });
         await u.roles().attach(req.body.role_id);
 
         res.redirect(`/users/roles/${u.id}`);
     }
 
     static removeRole: ControllerAction = async (req, res) => {
-        const u = new User({ id: parseInt(req.params.id) });
+        const u = User.assign({ id: parseInt(req.params.id) });
         await u.roles().detach(req.query.role_id);
 
         res.redirect(`/users/roles/${u.id}`);

@@ -39,7 +39,7 @@ export class PostController {
     }
 
     static update: ControllerAction = async (req, res) => {
-        const post = new Post({
+        const post = Post.assign({
             ...req.body,
             id: req.params.id
         });

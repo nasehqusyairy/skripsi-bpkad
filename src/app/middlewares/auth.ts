@@ -24,7 +24,7 @@ const getUserFromToken = async (token: string) => {
 
     return {
         userId: payload.userId,
-        roles: (user.roles as unknown as Role[]).map(role => role.name),
+        roles: user.attributes.roles.map(role => role.name),
         tahun_buku: payload.tahun_buku
     };
 };

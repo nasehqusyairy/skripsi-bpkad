@@ -1,7 +1,6 @@
 import { Model } from "@/utils/model/Model";
-import { Comment } from "./Comment";
-import { Post } from "./Post";
-import { Role } from "./Role";
+import { IPost, Post } from "./Post";
+import { IRole, Role } from "./Role";
 
 export interface IUser {
     id: number;
@@ -9,19 +8,15 @@ export interface IUser {
     password: string;
     created_at: string;
     updated_at: string;
+
+    roles?: (Role & IRole)[];
+    posts?: (Post & IPost)[];
 }
 
-export class User extends Model<IUser> implements IUser {
-    constructor(attributes: Partial<IUser> = {}) {
-        super(attributes);
+export class User extends Model<IUser> {
+    constructor() {
+        super();
     }
-
-    // implementasi interface
-    id: number;
-    email: string;
-    password: string;
-    created_at: string;
-    updated_at: string;
 
     // Tambahkan relasi manual di sini jika diperlukan
     roles() {

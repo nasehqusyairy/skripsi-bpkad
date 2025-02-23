@@ -26,15 +26,16 @@ export class Model<I> {
 
     protected DB: QueryBuilder;
 
-    private _eagerLoading = [];
+    private relationConfigs = [];
 
-    constructor(attributes: Partial<I> = {}) {
-        this.assign(attributes);
+    private includePointer: any;
+
+    constructor() {
         this.DB = createQueryBuilder();
     }
 
     // #region Static Helpers
-    async first(): Promise<this | null> {
+    async first(): Promise<this & I | null> {
         this.DB.tbl = this.getTableName();
         // Ambil data pertama dari database
         const data = await this.DB.first();
@@ -48,7 +49,7 @@ export class Model<I> {
             await this.eagerLoadRelations([this]);
 
             // Kembalikan instance model
-            return this;
+            return this as this & I;
         }
 
         // Jika data tidak ditemukan, kembalikan null
@@ -65,12 +66,7 @@ export class Model<I> {
         return model.getTableName();
     }
 
-    /**
-     * Mendapatkan data berdasarkan primary key.
-     * @param {number|string} id - Nilai primary key.
-     * @returns {Promise<Model<unknown>|null>} - Instance model atau null jika tidak ditemukan.
-     */
-    static async find<T extends Model<K>, K extends object>(this: new () => T, id: number | string): Promise<T | null> {
+    static async find<T extends Model<unknown>>(this: new () => T, id: number | string) {
         const model = new this();
         model.DB.where(model.primaryKey, id);
         return await model.first();
@@ -81,18 +77,28 @@ export class Model<I> {
         return model.primaryKey;
     }
 
-    static async all() {
+    static async all<T extends Model<unknown>>(this: new () => T): Promise<T[]> {
         const model = new this();
         const results = await model.DB.get();
-        return results.map((result: object) => new this(result));
+        return results.map(result => model.assign(result));
+    }
+
+    static assign<T extends Model<I>, I extends object>(this: new () => T, attributes: Partial<I>): T & I {
+        const modelInstance = new this();
+
+        modelInstance.attributes = attributes;
+        Object.assign(modelInstance, attributes);
+
+        return modelInstance as T & I;
     }
     // #endregion
 
 
     // #region Helpers
-    assign(attributes: Partial<I>): void {
+    private assign(attributes: Partial<I>): this & I {
         this.attributes = attributes;
         Object.assign(this, attributes);
+        return this as this & I;
     }
 
     getTableName() {
@@ -114,7 +120,7 @@ export class Model<I> {
 
 
     // #region Select
-    static select<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, ...columns: (keyof K)[]): T {
+    static select<T extends Model<unknown>>(this: new () => T, ...columns: (string)[]): T {
         const model = new this();
         model.DB.select(...columns);
         return model;
@@ -125,7 +131,7 @@ export class Model<I> {
         return this;
     }
 
-    static distinct<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, ...columns: (keyof K)[]): T {
+    static distinct<T extends Model<unknown>>(this: new () => T, ...columns: (string)[]): T {
         const model = new this();
         model.DB.distinct(...columns);
         return model;
@@ -139,7 +145,7 @@ export class Model<I> {
     // #endregion
 
     // #region Order and Limit
-    static groupBy<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, ...columns: (keyof K)[]): T {
+    static groupBy<T extends Model<unknown>>(this: new () => T, ...columns: (string)[]): T {
         const model = new this();
         model.DB.whereNot(columns[0], "''");
         model.DB.groupBy(...columns);
@@ -159,7 +165,7 @@ export class Model<I> {
         return this;
     }
 
-    static orderBy<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, direction: "ASC" | "DESC" = "ASC"): T {
+    static orderBy<T extends Model<unknown>>(this: new () => T, column: string, direction: "ASC" | "DESC" = "ASC"): T {
         const model = new this();
         model.DB.orderBy(column, direction);
         return model;
@@ -236,11 +242,11 @@ export class Model<I> {
 
     // #region Where Static
 
-    static where<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, operator: QueryOperator, value: any): T
-    static where<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, value: any): T
-    static where<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, args: Partial<K>): T
+    static where<T extends Model<unknown>>(this: new () => T, column: string, operator: QueryOperator, value: any): T
+    static where<T extends Model<unknown>>(this: new () => T, column: string, value: any): T
+    static where<T extends Model<unknown>>(this: new () => T, args: object): T
 
-    static where<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, ...args: [keyof K, QueryOperator, any] | [keyof K, any] | [Partial<K>]): T {
+    static where<T extends Model<unknown>>(this: new () => T, ...args: [string, QueryOperator, any] | [string, any] | [object]): T {
         const model = new this()
 
         if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
@@ -262,11 +268,11 @@ export class Model<I> {
         return model
     }
 
-    static whereNot<T extends Model<K>, K>(this: new () => T, column: keyof K, operator: QueryOperator, value: any): T
-    static whereNot<T extends Model<K>, K>(this: new () => T, column: keyof K, value: any): T
-    static whereNot<T extends Model<K>, K>(this: new () => T, args: Partial<K>): T
+    static whereNot<T extends Model<unknown>>(this: new () => T, column: string, operator: QueryOperator, value: any): T
+    static whereNot<T extends Model<unknown>>(this: new () => T, column: string, value: any): T
+    static whereNot<T extends Model<unknown>>(this: new () => T, args: object): T
 
-    static whereNot<T extends Model<K>, K>(this: new () => T, ...args: [keyof K, QueryOperator, any] | [keyof K, any] | [Partial<K>]): T {
+    static whereNot<T extends Model<unknown>>(this: new () => T, ...args: [string, QueryOperator, any] | [string, any] | [object]): T {
         const model = new this();
 
         if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
@@ -288,51 +294,51 @@ export class Model<I> {
         return model
     }
 
-    static whereNull<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K) {
+    static whereNull<T extends Model<unknown>>(this: new () => T, column: string) {
         const model = new this();
         model.DB.whereNull(column);
         return model
     }
 
-    static whereNotNull<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K) {
+    static whereNotNull<T extends Model<unknown>>(this: new () => T, column: string) {
         const model = new this();
         model.DB.whereNotNull(column);
         return model
     }
 
-    static whereExists<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, callback: (query: QueryBuilder) => void) {
+    static whereExists<T extends Model<unknown>>(this: new () => T, callback: (query: QueryBuilder) => void) {
         const model = new this();
         model.DB.whereExists(callback);
         return model
     }
 
-    static whereNotExists<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, callback: (query: QueryBuilder) => void) {
+    static whereNotExists<T extends Model<unknown>>(this: new () => T, callback: (query: QueryBuilder) => void) {
         const model = new this();
         model.DB.whereNotExists(callback);
         return model
     }
 
-    static whereBetween<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, values: [any, any]) {
+    static whereBetween<T extends Model<unknown>>(this: new () => T, column: string, values: [any, any]) {
         const model = new this();
         model.DB.whereBetween(column, values);
         return model
     }
 
-    static whereNotBetween<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, values: [any, any]) {
+    static whereNotBetween<T extends Model<unknown>>(this: new () => T, column: string, values: [any, any]) {
         const model = new this();
         model.DB.whereNotBetween(column, values);
         return model
     }
 
-    static whereIn<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, values: any[]) {
+    static whereIn<T extends Model<unknown>>(this: new () => T, column: string, values: any[]) {
         const model = new this();
         model.DB.whereIn(column, values);
         return model
     }
 
-    static whereNotIn<T extends Model<K>, K extends object>(
-        this: new (attributes?: Partial<K>) => T,
-        conditions: { [P in keyof K]?: any[] }
+    static whereNotIn<T extends Model<unknown>>(
+        this: new () => T,
+        conditions: { [P in string]?: any[] }
     ) {
         const model = new this();
         for (const column in conditions) {
@@ -344,10 +350,10 @@ export class Model<I> {
     }
 
 
-    static whereLike<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, value: any): T;
-    static whereLike<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, args: Partial<K>): T;
+    static whereLike<T extends Model<unknown>>(this: new () => T, column: string, value: any): T;
+    static whereLike<T extends Model<unknown>>(this: new () => T, args: object): T;
 
-    static whereLike<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, ...args: [keyof K, any] | [Partial<K>]) {
+    static whereLike<T extends Model<unknown>>(this: new () => T, ...args: [string, any] | [object]) {
         const model = new this();
 
         if (args.length === 1 && typeof args[0] === "object" && args[0] !== null) {
@@ -365,10 +371,10 @@ export class Model<I> {
         return model;
     }
 
-    static whereNotLike<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, column: keyof K, value: any): T;
-    static whereNotLike<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, args: Partial<K>): T;
+    static whereNotLike<T extends Model<unknown>>(this: new () => T, column: string, value: any): T;
+    static whereNotLike<T extends Model<unknown>>(this: new () => T, args: object): T;
 
-    static whereNotLike<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, ...args: [keyof K, any] | [Partial<K>]) {
+    static whereNotLike<T extends Model<unknown>>(this: new () => T, ...args: [string, any] | [object]) {
         const model = new this();
 
         if (args.length === 1 && typeof args[0] === "object" && args[0] !== null) {
@@ -386,7 +392,7 @@ export class Model<I> {
         return model;
     }
 
-    static whereColumnsLike<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, columns: (keyof K)[], value: any): T {
+    static whereColumnsLike<T extends Model<unknown>>(this: new () => T, columns: (string)[], value: any): T {
         const model = new this();
 
         if (!value.replace('%%', '')) return model;
@@ -703,7 +709,8 @@ export class Model<I> {
 
     // #endregion
 
-    async save() {
+    //#region Create & Update
+    async save(): Promise<this & I> {
         if (this[this.getPrimaryKey()]) {
             // Jika primary key ada, lakukan update
 
@@ -714,25 +721,24 @@ export class Model<I> {
             // Jika primary key tidak ada, lakukan insert
             await this.create(this.attributes);
         }
-        return this;
+        return this as this & I;
     }
 
-    async update(data: Partial<I>) {
+    async update(data: Partial<I>): Promise<number> {
+        const keys = Object.keys(data);
+        const values = Object.values(data);
 
-        const setClause = Object.keys(data)
-            .map(key => `${key} = '${data[key]}'`)
-            .join(", ");
-
+        const setClause = keys.map(key => `${key} = ?`).join(", ");
         const whereClause = this.DB.getRaw().replace("SELECT *", "").replace("from " + this.getTableName(), "").trim();
         const query = `UPDATE ${this.getTableName()} SET ${setClause} ${whereClause}`;
 
-        const result: RowDataPacket = (await MYSQL.query(query))[0] as RowDataPacket;
-        const { affectedRows } = result;
+        const [{ affectedRows }] = await MYSQL.execute<ResultSetHeader>(query, values);
 
         this.assign(data);
 
         return affectedRows;
     }
+
 
     private async create(data: Partial<I>) {
         const columns = Object.keys(data);
@@ -741,8 +747,7 @@ export class Model<I> {
 
         const query = `INSERT INTO ${this.getTableName()} (${columns.join(", ")}) VALUES (${placeholders})`;
 
-        const [result] = await MYSQL.execute<ResultSetHeader>(query, values);
-        const insertId = result.insertId;
+        const [{ insertId }] = await MYSQL.execute<ResultSetHeader>(query, values);
 
         this.assign({
             ...data,
@@ -752,7 +757,7 @@ export class Model<I> {
         return insertId;
     }
 
-    static async create<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, data: Partial<K>): Promise<T> {
+    static async create<T extends Model<I>, I extends object>(this: new () => T, data: Partial<I>) {
         const columns = Object.keys(data);
         const placeholders = columns.map(() => "?").join(", ");
         const values = Object.values(data);
@@ -765,16 +770,13 @@ export class Model<I> {
 
         const insertId = result.insertId;
 
-        modelInstance.assign({
+        return modelInstance.assign({
             ...data,
             [modelInstance.getPrimaryKey()]: insertId
-        })
-
-        return modelInstance;
+        });
     }
 
-
-    static async insert<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, dataArray: Partial<K>[]) {
+    static async insert<T extends Model<I>, I extends object>(this: new () => T, dataArray: Partial<I>[]) {
         if (dataArray.length === 0) return 0;
 
         const CHUNK_SIZE = 100;
@@ -784,8 +786,10 @@ export class Model<I> {
 
         let totalAffectedRows = 0;
 
-        // Membagi data menjadi beberapa batch
-        const chunks = chunkArray(dataArray, CHUNK_SIZE);
+        // Split data into chunks
+        const chunks = Array.from({ length: Math.ceil(dataArray.length / CHUNK_SIZE) }, (_, i) =>
+            dataArray.slice(i * CHUNK_SIZE, i * CHUNK_SIZE + CHUNK_SIZE)
+        );
 
         for (const chunk of chunks) {
             const placeholders = chunk.map(() => `(${columns.map(() => "?").join(", ")})`).join(", ");
@@ -798,6 +802,7 @@ export class Model<I> {
 
         return totalAffectedRows;
     }
+    //#endregion
 
     // #region Delete
 
@@ -818,16 +823,13 @@ export class Model<I> {
         return affectedRows;
     }
 
-
-    static async delete<T extends Model<K>, K extends object>(this: new (attributes?: Partial<K>) => T, id: number | string) {
+    static async delete<T extends Model<I>, I extends object>(this: new () => T, id: number | string) {
         const model = new this();
-        return await model.where(model.primaryKey as keyof K, id).delete();
+        return await model.where(model.primaryKey as keyof I, id).delete();
     }
-
     // #endregion
 
     // #region Relationship
-    // Fungsi untuk mendefinisikan relasi hasOne
     hasOne<R>(model: typeof Model<R>, foreignKey?: string): HasOne<I, R> {
         if (!foreignKey) {
             foreignKey = `${this.constructor.name.toLowerCase()}_${this.primaryKey}`;
@@ -836,10 +838,7 @@ export class Model<I> {
         return new HasOne(model, foreignKey);
     }
 
-
-    // Fungsi untuk mendefinisikan relasi hasMany
     hasMany<R>(model: typeof Model<R>, foreignKey?: string): HasMany<I, R> {
-
         if (!foreignKey) {
             foreignKey = `${this.constructor.name.toLocaleLowerCase()}_${this.primaryKey}`;
         }
@@ -847,7 +846,6 @@ export class Model<I> {
         return new HasMany(model, foreignKey);
     }
 
-    // Fungsi untuk mendefinisikan relasi belongsTo
     belongsTo<R>(model: typeof Model<R>, foreignKey?: string, primaryKey?: string): BelongsTo<I, R> {
         if (!foreignKey) {
             foreignKey = `${model.name.toLowerCase()}_${model.getPrimaryKey()}`;
@@ -860,9 +858,7 @@ export class Model<I> {
         return new BelongsTo(model, foreignKey, primaryKey);
     }
 
-    // Fungsi untuk mendefinisikan relasi belongsToMany
     belongsToMany<R>(model: typeof Model<R>, pivotTable: string, foreignKey?: string, relatedKey?: string): BelongsToMany<I, R> {
-
         if (!foreignKey) {
             foreignKey = `${this.constructor.name.toLocaleLowerCase()}_${this.primaryKey}`;
         }
@@ -877,19 +873,16 @@ export class Model<I> {
     // #endregion
 
     // #region With
-    // Method untuk eager loading, simpan nama relasi beserta objek relasi yang dikembalikan
     with<T extends keyof this>(...relations: T[]): this {
         const newRelations = this.parseRelations(relations as string[]);
 
         relations.forEach(relation => {
-
-            const existingRelation = this._eagerLoading.find(r => r.name === relation);
+            const existingRelation = this.relationConfigs.find(r => r.name === relation);
             if (!existingRelation) {
-                this._eagerLoading.push(newRelations.find(r => r.name === relation));
+                this.relationConfigs.push(newRelations.find(r => r.name === relation));
             } else {
-                this._eagerLoading[this._eagerLoading.indexOf(existingRelation)] = newRelations.find(r => r.name === relation);
+                this.relationConfigs[this.relationConfigs.indexOf(existingRelation)] = newRelations.find(r => r.name === relation);
             }
-
         });
 
         return this;
@@ -897,20 +890,21 @@ export class Model<I> {
 
     static with<T extends Model<unknown>>(this: new () => T, ...relations: (keyof T)[]) {
         const modelInstance = new this();
-        modelInstance._eagerLoading = modelInstance.parseRelations(relations as string[]);
+        modelInstance.relationConfigs = modelInstance.parseRelations(relations as string[]);
         return modelInstance;
     }
 
     include(relation: string, callback?: (relation: QueryBuilder, pivot?: QueryBuilder) => void) {
         const newRelation = this.parseRelations([relation])[0];
-        const existingRelation = this._eagerLoading.find(r => r.name === newRelation.name);
+        const existingRelation = this.relationConfigs.find(r => r.name === newRelation.name);
         if (!existingRelation) {
-            this._eagerLoading.push({ name: relation, nested: [], callback });
+            this.relationConfigs.push({ name: relation, nested: [], callback });
         } else {
-            this._eagerLoading[this._eagerLoading.indexOf(existingRelation)] = newRelation
+            this.relationConfigs[this.relationConfigs.indexOf(existingRelation)] = newRelation
         }
 
-        // console.log(this._eagerLoading[1]?.nested);
+        this.includePointer = this.relationConfigs.find(r => r.name === newRelation.name);
+        // console.log(this.relationConfigs[1]?.nested);
         return this;
     }
 
@@ -918,24 +912,29 @@ export class Model<I> {
         const modelInstance = new this();
 
         const newRelation = modelInstance.parseRelations([relation])[0];
-        const existingRelation = modelInstance._eagerLoading.find(r => r.name === newRelation.name);
+        const existingRelation = modelInstance.relationConfigs.find(r => r.name === newRelation.name);
         if (!existingRelation) {
-            modelInstance._eagerLoading.push({ name: relation, nested: [], callback });
+            modelInstance.relationConfigs.push({ name: relation, nested: [], callback });
         } else {
-            modelInstance._eagerLoading[modelInstance._eagerLoading.indexOf(existingRelation)] = newRelation
+            modelInstance.relationConfigs[modelInstance.relationConfigs.indexOf(existingRelation)] = newRelation
         }
 
+        modelInstance.includePointer = modelInstance.relationConfigs.find(r => r.name === newRelation.name);
         return modelInstance;
     }
 
     thenInclude(relation: string, callback?: (query: any) => void) {
-        if (this._eagerLoading.length === 0) {
-            throw new Error("thenInclude() harus dipanggil setelah include()");
+        if (this.relationConfigs.length === 0) {
+            throw new Error("thenInclude() must be called after include()");
         }
 
-        let lastRelation = this._eagerLoading[this._eagerLoading.length - 1];
+        let lastRelation = this.includePointer || this.relationConfigs[this.relationConfigs.length - 1];
 
-        lastRelation.nested.push({ name: relation, nested: [], callback });
+        const newRelation = { name: relation, nested: [], callback }
+
+        lastRelation.nested.push(newRelation);
+
+        this.includePointer = newRelation;
         return this;
     }
 
@@ -957,17 +956,14 @@ export class Model<I> {
         return parsedRelations;
     }
 
-    private async eagerLoadRelations(results: this[], relations: any[] = this._eagerLoading, parentModel: any = this) {
-
-
+    private async eagerLoadRelations(results: this[], relations: any[] = this.relationConfigs, parentModel: any = this) {
         for (const { name, nested, callback } of relations) {
             const relationInstance = parentModel[name]();
-            const key = relationInstance.constructor.name == "BelongsTo" ? relationInstance.foreignKey : this.primaryKey;
-            const ids = (results as unknown as Partial<I>[]).map((result: Partial<I>) => result[key]);
 
-            let relatedQuery = relationInstance.fetch(ids, callback);
-            let relatedData = await relatedQuery;
+            const key = relationInstance.constructor.name == "BelongsTo" ? relationInstance.foreignKey : parentModel.primaryKey;
+            const ids = [...new Set((results as unknown as Partial<I>[]).map((result: Partial<I>) => result[key]))];
 
+            let relatedData = await relationInstance.fetch(ids, callback);
             relationInstance.attachResults(results, relatedData, name);
 
             if (nested.length > 0) {
@@ -976,22 +972,21 @@ export class Model<I> {
             }
         }
     }
+    // #endregion
 
-    async get(): Promise<this[]> {
+    // #region Get
+    async get(): Promise<(this & I)[]> {
         this.DB.tbl = this.getTableName();
         let results = await this.DB.get();
 
-        const ModelConstructor = this.constructor as { new(attributes: any): Model<I> };
-        results = results.map((result: Partial<I>) => new ModelConstructor(result));
+        const ModelConstructor = this.constructor as { new(): Model<I> };
+        results = results.map((result: Partial<I>) => new ModelConstructor().assign(result));
 
         await this.eagerLoadRelations(results);
 
         return results;
     }
 
-    // #endregion
-
-    // #region Get
     getRaw() {
         return this.DB.getRaw();
     }
@@ -1000,28 +995,23 @@ export class Model<I> {
         this.DB.tbl = this.getTableName();
         const pagination = await this.DB.paginate(page, perPage);
 
-        // Ubah result menjadi instance model
-        const ModelConstructor = this.constructor as { new(attributes: any): Model<I> };
-        pagination.result = pagination.result.map((result: any) => new ModelConstructor(result));
+        const ModelConstructor = this.constructor as { new(): Model<I> };
+        pagination.result = (pagination.result as I[]).map(result => new ModelConstructor().assign(result));
 
-        // Lakukan eager loading
         await this.eagerLoadRelations(pagination.result);
 
-        // Kembalikan instance Paginator
-        return new Paginator<this>(pagination);
+        return new Paginator<this & I>(pagination);
     }
-
     // #endregion
 
     // #region Load
-    async load<T extends keyof this>(...relations: T[]): Promise<this> {
-        this._eagerLoading = relations.map(relation => {
+    async load<T extends keyof this>(...relations: T[]): Promise<this & I> {
+        this.relationConfigs = relations.map(relation => {
             const relationObj = (this[relation] as Function)();
             return { relation, ...relationObj };
         });
 
-        // Ambil data relasi
-        for (const { relation } of this._eagerLoading) {
+        for (const { relation } of this.relationConfigs) {
             const relationInstance = this[relation]();
 
             const key = relationInstance.constructor.name == "BelongsTo" ? relationInstance.foreignKey : this.primaryKey;
@@ -1031,13 +1021,7 @@ export class Model<I> {
             relationInstance.attachResults([this], relatedData, relation);
         }
 
-        return this;
+        return this as this & I;
     }
     // #endregion
-}
-
-function chunkArray<T>(array: T[], chunkSize: number): T[][] {
-    return Array.from({ length: Math.ceil(array.length / chunkSize) }, (_, i) =>
-        array.slice(i * chunkSize, i * chunkSize + chunkSize)
-    );
 }

@@ -45,28 +45,40 @@ export const createQueryBuilder = () => {
         return queryBuilder;
     };
 
-    // Override fungsi where
-    queryBuilder.where = function (...args: any[]) {
-
+    queryBuilder.where = function (...args: [Function] | [string, string, any] | [string, any] | [object]) {
         if (args[0] instanceof Function) {
             queryBuilder.query = `${(queryBuilder.query ? queryBuilder.query + ' AND' : '')} (`;
             queryBuilder.whereParams = undefined;
             args[0](queryBuilder);
             queryBuilder.query += ' )';
+        } else if (typeof args[0] === 'object' && !Array.isArray(args[0])) {
+            // Jika argumen pertama adalah objek (misalnya { key: value, key2: value2 })
+            Object.entries(args[0]).forEach(([key, value], index) => {
+                const qryString = `${key} = ${queryBuilder.getStrParam(value)}`;
+                if (index === 0 && !queryBuilder.whereParams) {
+                    queryBuilder.whereParams = [qryString];
+                    queryBuilder.query = (queryBuilder.query ? queryBuilder.query + ' AND ' : '') + qryString;
+                } else {
+                    queryBuilder.whereParams.push(` AND ${qryString}`);
+                    queryBuilder.query += ` AND ${qryString}`;
+                }
+            });
         } else {
-            const operatorAndVal = args.length > 2 ? ` ${args[1]} ${queryBuilder.getStrParam(args[2])}` : ` = ${queryBuilder.getStrParam(args[1])}`;
+            // Jika bentuknya (column, operator, value) atau (column, value)
+            const column = args[0];
+            const operator = args.length === 3 ? args[1] : '=';
+            const value = args.length === 3 ? args[2] : args[1];
+            const qryString = `${column} ${operator} ${queryBuilder.getStrParam(value)}`;
 
-            if (queryBuilder.whereParams || queryBuilder.query && !queryBuilder.query.endsWith('(')) {
-                const qryString = ` AND ${args[0]}${operatorAndVal}`;
+            if (queryBuilder.whereParams || (queryBuilder.query && !queryBuilder.query.endsWith('('))) {
                 if (!queryBuilder.whereParams) {
                     queryBuilder.whereParams = [];
                 }
-                queryBuilder.whereParams.push(qryString);
-                queryBuilder.query += qryString;
+                queryBuilder.whereParams.push(` AND ${qryString}`);
+                queryBuilder.query += ` AND ${qryString}`;
             } else {
-                const qryString = [args[0] + operatorAndVal];
-                queryBuilder.whereParams = qryString;
-                queryBuilder.query = `${(queryBuilder.query ? queryBuilder.query : '')} ${qryString}`
+                queryBuilder.whereParams = [qryString];
+                queryBuilder.query = (queryBuilder.query ? queryBuilder.query : '') + " " + qryString;
             }
         }
         return queryBuilder;
