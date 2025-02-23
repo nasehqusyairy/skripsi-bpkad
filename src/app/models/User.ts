@@ -1,6 +1,6 @@
 import { Model } from "@/utils/model/Model";
-import { IPost, Post } from "./Post";
-import { IRole, Role } from "./Role";
+import { Comment, IComment } from "./Comment";
+import { Post, IPost } from "./Post";
 
 export interface IUser {
     id: number;
@@ -8,8 +8,7 @@ export interface IUser {
     password: string;
     created_at: string;
     updated_at: string;
-
-    roles?: (Role & IRole)[];
+    comments?: (Comment & IComment)[];
     posts?: (Post & IPost)[];
 }
 
@@ -17,10 +16,11 @@ export class User extends Model<IUser> {
     constructor() {
         super();
     }
-
+    
+    
     // Tambahkan relasi manual di sini jika diperlukan
-    roles() {
-        return this.belongsToMany(Role, 'role_user');
+    comments() {
+        return this.hasMany(Comment);
     }
 
     posts() {
