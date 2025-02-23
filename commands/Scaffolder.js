@@ -292,7 +292,9 @@ async function scaffoldNewTables() {
     const existingMigrations = await getExistingMigrations();
     const existingModels = await getExistingModels();
 
-    const newTables = allTables.filter(table => (!(existingMigrations.includes(table.toLowerCase()) && existingModels.map(m => pluralize(m)).includes(table.toLowerCase()))) && !isPivotTable(table));
+    const isSorceConfigured = process.env.SCAFFOLDING_SOURCE_TABLES;
+
+    const newTables = allTables.filter(table => (!(existingMigrations.includes(table.toLowerCase()) && existingModels.map(m => pluralize(m)).includes(table.toLowerCase()))) && (process.env.SCAFFOLDING_SOURCE_TABLES || !isPivotTable(table)));
 
     if (newTables.length === 0) {
         console.log('\x1b[33m%s\x1b[0m', 'Tidak ada tabel baru untuk di-scaffold.');
