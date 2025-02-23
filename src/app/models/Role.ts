@@ -12,7 +12,8 @@ export class Role extends Model<IRole> {
     constructor() {
         super();
     }
-
+    
+    
     // Tambahkan relasi manual di sini jika diperlukan
-
+    
 }

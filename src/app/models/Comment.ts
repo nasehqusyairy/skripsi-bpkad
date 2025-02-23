@@ -1,6 +1,6 @@
 import { Model } from "@/utils/model/Model";
-import { User } from "./User";
-import { Post } from "./Post";
+import { User, IUser } from "./User";
+import { Post, IPost } from "./Post";
 
 export interface IComment {
     id: number;
@@ -9,19 +9,22 @@ export interface IComment {
     body: string;
     created_at: string;
     updated_at: string;
+    user?: User & IUser;
+    post?: Post & IPost;
 }
 
 export class Comment extends Model<IComment> {
     constructor() {
         super();
     }
-
+    
+    
     // Tambahkan relasi manual di sini jika diperlukan
     user() {
-        return this.belongsTo(User, 'user_id');
+        return this.belongsTo(User);
     }
 
     post() {
-        return this.belongsTo(Post, 'post_id');
+        return this.belongsTo(Post);
     }
 }

@@ -8,6 +8,8 @@
     "watch": "concurrently \"tsc -w\" \"nodemon --env-file=.env ./build/index\"",
     "build": "node ./commands/Build.js",
     "scaffold": "node --env-file=.env ./commands/Scaffolder.js",
+    "scaffold:find": "node --env-file=.env ./commands/Scaffolder.js --find",
+    "scaffold:new-tables": "node --env-file=.env ./commands/Scaffolder.js --new-tables",
     "scaffold:seeder": "node --env-file=.env ./commands/SeedScaffolder.js",
     "migrate": "npm run build && node --env-file=.env ./commands/Migrate.js",
     "migrate:rollback": "npm run build && node --env-file=.env ./commands/Rollback.js",
