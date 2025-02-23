@@ -1,18 +1,18 @@
 export class Paginator<T> {
 
-    results: T[];
-    total: number;
-    currentPage: number;
-    perPage: number;
-    lastPage: number;
+    results: T[] = [];
+    total: number = 0;
+    currentPage: number = 1;
+    perPage: number = 10;
+    lastPage: number = 1;
 
-    constructor(paginationResult?: any) {
+    constructor(paginationResult?: any, results?: T[]) {
         if (paginationResult) {
-            this.results = paginationResult.result;
-            this.total = paginationResult.pages * paginationResult.perPage;
-            this.currentPage = paginationResult.currentPage;
-            this.perPage = paginationResult.perPage;
-            this.lastPage = paginationResult.lastPage;
+            this.results = results || paginationResult.result || this.results;
+            this.total = paginationResult.total || paginationResult.pages * paginationResult.perPage || this.total;
+            this.currentPage = paginationResult.currentPage || this.currentPage;
+            this.perPage = paginationResult.perPage || this.perPage;
+            this.lastPage = paginationResult.pages || this.lastPage;
         }
     }
 

@@ -1,4 +1,3 @@
-import { Role } from '@/app/models/Role';
 import { User } from '@/app/models/User';
 import { addToBlacklist } from '@/utils/Blacklist';
 import { ControllerAction } from '@/utils/References';
@@ -17,7 +16,7 @@ export class AuthController {
 
         if (user && bcrypt.compareSync(password, user.password)) {
             req.session.userId = user.id;
-            req.session.roles = (user.roles as unknown as Role[]).map(role => role.name);
+            req.session.roles = user.roles.map(role => role.name);
 
             // Buat token JWT
             const secret = new TextEncoder().encode(process.env.SESSION_SECRET);
@@ -35,6 +34,9 @@ export class AuthController {
                 sameSite: "strict",
                 expires: new Date(decoded.exp * 1000)
             });
+
+            console.log(req.query);
+
 
             return res.redirect(req.query.next ? req.query.next as string : "/dashboard");
         }
@@ -67,8 +69,8 @@ export class AuthController {
 
         await user.load('roles')
 
-        req.session.userId = user.id;
-        req.session.roles = (user.roles as unknown as Role[]).map(role => role.name);
+        req.session.userId = user.attributes.id;
+        req.session.roles = user.attributes.roles.map(role => role.name);
 
         return res.redirect("/dashboard");
     }

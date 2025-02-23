@@ -16,6 +16,9 @@ export class HasMany<I, R> {
     }
 
     async fetch(ids: any[], callback?: (qry: QueryBuilder) => void): Promise<object[]> {
+        if (ids.length === 0) {
+            return [];
+        }
         const query = DB.table(this.model.getTableName()).whereIn(this.foreignKey, ids);
         callback && callback(query);
         return await query.get();
