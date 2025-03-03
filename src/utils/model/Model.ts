@@ -966,7 +966,7 @@ export class Model<I> {
             relationInstance.attachResults(results, relatedData, name);
 
             if (nested.length > 0) {
-                relatedData = relatedData.map((item: any) => new relationInstance.model(item))
+                relatedData = relatedData.map((item: any) => relationInstance.model.assign(item))
                 await this.eagerLoadRelations(relatedData, nested, new relationInstance.model());
             }
         }
