@@ -1,6 +1,6 @@
 import QueryBuilder from 'eloquent-query-builder';
 import { createQueryBuilder, MYSQL } from "@/utils/database/DB";
-import { pluralize } from 'sequelize/lib/utils';
+import { pluralize, singularize } from 'sequelize/lib/utils';
 import { Paginator } from './Paginator';
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { HasOne } from './relation/HasOne';
@@ -832,7 +832,7 @@ export class Model<I> {
     // #region Relationship
     hasOne<R>(model: typeof Model<R>, foreignKey?: string): HasOne<I, R> {
         if (!foreignKey) {
-            foreignKey = `${this.constructor.name.toLowerCase()}_${this.primaryKey}`;
+            foreignKey = `${singularize(this.getTableName().toLowerCase())}_${this.primaryKey}`;
         }
 
         return new HasOne(model, foreignKey);
@@ -840,7 +840,7 @@ export class Model<I> {
 
     hasMany<R>(model: typeof Model<R>, foreignKey?: string): HasMany<I, R> {
         if (!foreignKey) {
-            foreignKey = `${this.constructor.name.toLocaleLowerCase()}_${this.primaryKey}`;
+            foreignKey = `${singularize(this.getTableName().toLowerCase())}_${this.primaryKey}`;
         }
 
         return new HasMany(model, foreignKey);
@@ -848,7 +848,7 @@ export class Model<I> {
 
     belongsTo<R>(model: typeof Model<R>, foreignKey?: string, primaryKey?: string): BelongsTo<I, R> {
         if (!foreignKey) {
-            foreignKey = `${model.name.toLowerCase()}_${model.getPrimaryKey()}`;
+            foreignKey = `${singularize(model.getTableName().toLowerCase())}_${model.getPrimaryKey()}`;
         }
 
         if (!primaryKey) {
@@ -860,16 +860,15 @@ export class Model<I> {
 
     belongsToMany<R>(model: typeof Model<R>, pivotTable: string, foreignKey?: string, relatedKey?: string): BelongsToMany<I, R> {
         if (!foreignKey) {
-            foreignKey = `${this.constructor.name.toLocaleLowerCase()}_${this.primaryKey}`;
+            foreignKey = `${singularize(this.getTableName().toLowerCase())}_${this.primaryKey}`;
         }
 
         if (!relatedKey) {
-            relatedKey = `${model.name.toLowerCase()}_${model.getPrimaryKey()}`;
+            relatedKey = `${singularize(model.getTableName().toLowerCase())}_${model.getPrimaryKey()}`;
         }
 
         return new BelongsToMany(this, model, pivotTable, foreignKey, relatedKey);
     }
-
     // #endregion
 
     // #region With
