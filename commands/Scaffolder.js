@@ -1,11 +1,7 @@
 const fs = require("fs");
 const path = require("path");
-const { ScaffoldingDB } = require("./DB");
+const { ScaffoldingDB: DB } = require("./DB");
 const { singularize, pluralize } = require("sequelize/lib/utils");
-
-const DB = ScaffoldingDB;
-const command = process.argv[2];
-const selectedTables = process.argv.slice(3) || process.env.SCAFFOLDING_SOURCE_TABLES?.split(",").map(e => e.trim()) || [];
 
 async function getExistingMigrations() {
     const migrationPath = path.join("src", "database", "migrations");
@@ -37,6 +33,8 @@ async function generate(targetTables) {
     const createdMigrations = [];
     const createdModels = [];
 
+    const scaffoldingMode = process.env.SCAFFOLDING_MODE
+
     for (const table of tables) {
         const tableName = table[`Tables_in_${databaseName}`];
 
@@ -52,16 +50,20 @@ async function generate(targetTables) {
         allTables.push({ name: tableName, columns });
 
         // Buat file migrasi
-        createdMigrations.push(await generateMigration(tableName, columns));
+        if (scaffoldingMode !== "model") {
+            createdMigrations.push(await generateMigration(tableName, columns));
+        }
 
-        // Buat file model (hanya untuk tabel yang bukan pivot)
+        if (scaffoldingMode !== "migration") {
+            // Buat file model (hanya untuk tabel yang bukan pivot)
+            // tabel pivot diasumsikan merupakan tabel yang mengandung _. jika tabel di dalam konfigurasi atau di dalam parameter mengandung _, maka larangan tabel pivot tidak berlaku
+            // cari apakah di dalam konfigurasi atau di dalam parameter terdapat tabel yang mengandung _
+            const isItemLikePivotExistInParameter = targetTables.some(t => t.includes("_")) || process.env.SCAFFOLDING_SOURCE_TABLES?.split(",").some(t => t.includes("_"));
 
-        // tabel pivot diasumsikan merupakan tabel yang mengandung _. jika tabel di dalam konfigurasi atau di dalam parameter mengandung _, maka larangan tabel pivot tidak berlaku
-        // cari apakah di dalam konfigurasi atau di dalam parameter terdapat tabel yang mengandung _
-        const isItemLikePivotExistInParameter = targetTables.some(t => t.includes("_")) || process.env.SCAFFOLDING_SOURCE_TABLES?.split(",").some(t => t.includes("_"));
-        if (targetTables.length > 0) {
-            if (!isPivotTable(tableName) || isItemLikePivotExistInParameter) {
-                createdModels.push(await generateModel(tableName, columns, allTables));
+            if (targetTables.length > 0) {
+                if (!isPivotTable(tableName) || isItemLikePivotExistInParameter) {
+                    createdModels.push(await generateModel(tableName, columns, allTables));
+                }
             }
         }
     }
@@ -297,7 +299,7 @@ async function scaffoldNewTables() {
     const existingMigrations = await getExistingMigrations();
     const existingModels = await getExistingModels();
 
-    const newTables = allTables.filter(table => (!(existingMigrations.includes(table.toLowerCase()) && existingModels.map(m => pluralize(m)).includes(table.toLowerCase()))) && (!process.env.SCAFFOLDING_SOURCE_TABLES || !isPivotTable(table)));
+    const newTables = allTables.filter(table => (!(existingMigrations.includes(table.toLowerCase()) && existingModels.map(m => pluralize(m)).includes(table.toLowerCase()))) && !isPivotTable(table));
 
     if (newTables.length === 0) {
         console.log('\x1b[33m%s\x1b[0m', 'Tidak ada tabel baru untuk di-scaffold.');
@@ -314,11 +316,11 @@ async function scaffoldFind() {
         return;
     }
 
-    await generate(selectedTables);
+    await generate(process.argv.slice(3));
 }
 
 async function main() {
-    switch (command) {
+    switch (process.argv[2]) {
         case "--new-tables":
             await scaffoldNewTables();
             break;
