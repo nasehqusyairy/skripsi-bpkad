@@ -12,7 +12,7 @@ export class Paginator<T> {
             this.total = paginationResult.total || paginationResult.pages * paginationResult.perPage || this.total;
             this.currentPage = paginationResult.currentPage || this.currentPage;
             this.perPage = paginationResult.perPage || this.perPage;
-            this.lastPage = paginationResult.pages || this.lastPage;
+            this.lastPage = paginationResult.lastPage || this.lastPage;
         }
     }
 
