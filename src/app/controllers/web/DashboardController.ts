@@ -7,7 +7,7 @@ export class DashboardController {
         const user = await User.find(req.session.userId);
 
         const viewModel = {
-            email: user.attributes.email
+            email: user.attributes.email + req.session.tahun_buku,
         }
 
         res.render("dashboard/index", viewModel);

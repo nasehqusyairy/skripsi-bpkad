@@ -32,7 +32,6 @@
           <div class="mb-3">
             <label for="tahun_buku" class="form-label">Tahun Buku</label>
             <select name="tahun_buku" id="tahun_buku" class="form-select">
-              <option value="">Pilih tahun buku...</option>
               <% tahun_buku.forEach(tahun=> { %>
               <option value="<%= tahun %>" <%= tahun == old('tahun_buku') ? 'selected' : ''%>><%= tahun %></option>
               <% }) %>

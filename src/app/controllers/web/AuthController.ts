@@ -10,7 +10,7 @@ export class AuthController {
     // Menampilkan halaman login
     static index: ControllerAction = async (req, res) => {
         const tahun_buku = (await BMOrg.select('tahun_buku').group().get()).map(item => item.tahun_buku);
-        res.render("auth/index", { tahun_buku });
+        res.render("auth/index", { tahun_buku: tahun_buku.sort((a, b) => b - a) });
     }
 
     static login: ControllerAction = async (req, res) => {
@@ -26,6 +26,7 @@ export class AuthController {
         if (user && bcrypt.compareSync(password, user.password)) {
             req.session.userId = user.id;
             req.session.roles = user.roles.map(role => role.name);
+            req.session.tahun_buku = tahun_buku;
 
             // Buat token JWT
             const secret = new TextEncoder().encode(process.env.SESSION_SECRET);
@@ -43,9 +44,6 @@ export class AuthController {
                 sameSite: "strict",
                 expires: new Date(decoded.exp * 1000)
             });
-
-            console.log(req.query);
-
 
             return res.redirect(req.query.next ? req.query.next as string : "/dashboard");
         }
